@@ -6,4 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rocket = "0.5.0"
+async-trait = "0.1.50"
+libunftp = "=0.18.8"
+rocket = { version = "0.5.0", features = ["json"] }
+tracing-attributes = "0.1.27"
+tokio = "1.36.0"
