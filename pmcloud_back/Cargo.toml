@@ -3,7 +3,6 @@ name = "pmcloud_back"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 async-trait = "0.1.50"
@@ -11,3 +10,6 @@ libunftp = "=0.18.8"
 rocket = { version = "0.5.0", features = ["json"] }
 tracing-attributes = "0.1.27"
 tokio = "1.36.0"
+diesel = { version = "2.1.4", features = ["mysql_backend", "mysql", "r2d2", ] }
+diesel_migrations = "2.1.0"
+dotenvy = "0.15.7"

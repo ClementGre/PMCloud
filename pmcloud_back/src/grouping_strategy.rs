@@ -30,6 +30,7 @@ pub enum ExifDataTypeValue {
     IsoSpeed(Vec<i32>),
     FNumber(Vec<f64>)
 }
+#[derive(Default)]
 pub enum Orientation {
     #[default]
     Unspecified,

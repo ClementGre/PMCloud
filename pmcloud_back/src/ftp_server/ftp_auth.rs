@@ -1,13 +1,14 @@
 use std::fmt::Display;
-use libunftp::auth::{Authenticator, AuthenticationError, UserDetail};
+
 use async_trait::async_trait;
+use libunftp::auth::{AuthenticationError, Authenticator, Credentials, UserDetail};
 
 #[derive(Debug)]
 pub struct PMAuthenticator;
 
 #[async_trait]
 impl Authenticator<PMUser> for PMAuthenticator {
-    async fn authenticate(&self, _username: &str, _password: &str) -> Result<PMUser, AuthenticationError> {
+    async fn authenticate(&self, _username: &str, _creds: &Credentials) -> Result<PMUser, AuthenticationError> {
         Ok(PMUser{})
         //Ok(AuthenticationError::BadPassword)
     }

@@ -25,7 +25,7 @@ impl StorageBackend<PMUser> for Vfs {
 
     async fn metadata<P: AsRef<Path> + Send + Debug>(
         &self,
-        user: &DefaultUser,
+        user: &PMUser,
         path: P,
     ) -> Result<Self::Metadata> {
         unimplemented!()
@@ -43,8 +43,6 @@ impl StorageBackend<PMUser> for Vfs {
         user: &PMUser,
         path: P,
     ) -> Result<Vec<Fileinfo<PathBuf, Self::Metadata>>>
-        where
-            <Self as StorageBackend<DefaultUser>>::Metadata: Metadata,
     {
         unimplemented!()
     }
