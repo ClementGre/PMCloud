@@ -1,55 +1,55 @@
-# CREATE TABLE users
-# (
-#     uid INT AUTO_INCREMENT,
-#     name VARCHAR(32) NOT NULL,
-#     email VARCHAR(256) NOT NULL UNIQUE,
-#     password_hash CHAR(64) NOT NULL,
-#     confirm_date DATETIME NOT NULL DEFAULT 1970-01-01 00:00:00,
-#     confirm_action ENUM(signup, signin, delete_account) NOT NULL DEFAULT signup,
-#     confirm_token BINARY(16) NOT NULL,
-#     confirm_code SMALLINT UNSIGNED NOT NULL,
-#     confirm_code_trials TINYINT UNSIGNED NOT NULL DEFAULT 0,
-#     auth_token BINARY(16) NOT NULL,
-#     status ENUM(unconfirmed, normal, banned, admin) NOT NULL DEFAULT unconfirmed,
-#     storage_count_mo INT UNSIGNED NOT NULL DEFAULT 0,
-#     CONSTRAINT PK_users PRIMARY KEY (uid)
-# );
+CREATE TABLE users
+(
+    id INT AUTO_INCREMENT,
+    name VARCHAR(32) NOT NULL,
+    email VARCHAR(256) NOT NULL UNIQUE,
+    password_hash CHAR(64) NOT NULL,
+    confirm_date DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00',
+    confirm_action ENUM('signup', 'signin', 'delete_account') NOT NULL DEFAULT 'signup',
+    confirm_token BINARY(16) NOT NULL,
+    confirm_code SMALLINT UNSIGNED NOT NULL,
+    confirm_code_trials TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    auth_token BINARY(16) NOT NULL,
+    status ENUM('unconfirmed', 'normal', 'banned', 'admin') NOT NULL DEFAULT 'unconfirmed',
+    storage_count_mo INT UNSIGNED NOT NULL DEFAULT 0,
+    CONSTRAINT PK_users PRIMARY KEY (id)
+);
 
-# CREATE TABLE shares_auto_accept
-# (
-#     CONSTRAINT PK_shares_auto_accept PRIMARY KEY (user_id_acceptor, user_id_sharer),
-#     user_id_acceptor INT,
-#     user_id_sharer INT,
-#     FOREIGN KEY (user_id_acceptor) REFERENCES users(uid),
-#     FOREIGN KEY (user_id_sharer) REFERENCES users(uid)
-# );
+CREATE TABLE shares_auto_accept
+(
+    CONSTRAINT PK_shares_auto_accept PRIMARY KEY (user_id_acceptor, user_id_sharer),
+    user_id_acceptor INT,
+    user_id_sharer INT,
+    FOREIGN KEY (user_id_acceptor) REFERENCES users(id),
+    FOREIGN KEY (user_id_sharer) REFERENCES users(id)
+);
 
-# CREATE TABLE tag_groups
-# (
-#     CONSTRAINT PK_tag_groups PRIMARY KEY (uid),
-#     uid INT AUTO_INCREMENT,
-#     user_uid INT NOT NULL,
-#     name VARCHAR(32) NOT NULL,
-#     is_multiple BOOLEAN NOT NULL DEFAULT FALSE,
-#     default_tag_uid INT UNSIGNED,
-#     FOREIGN KEY (user_uid) REFERENCES users(uid)
-# );
-#
-# CREATE TABLE tags
-# (
-#     CONSTRAINT PK_tags PRIMARY KEY (uid),
-#     uid INT AUTO_INCREMENT,
-#     group_uid INT NOT NULL,
-#     name VARCHAR(32) NOT NULL,
-#     color BINARY(3) NOT NULL DEFAULT 0x000000,
-#     FOREIGN KEY (group_uid) REFERENCES tag_groups(uid)
-# );
+CREATE TABLE tag_groups
+(
+    CONSTRAINT PK_tag_groups PRIMARY KEY (id),
+    id INT AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    name VARCHAR(32) NOT NULL,
+    is_multiple BOOLEAN NOT NULL DEFAULT FALSE,
+    default_tag_id INT UNSIGNED,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE tags
+(
+    CONSTRAINT PK_tags PRIMARY KEY (id),
+    id INT AUTO_INCREMENT,
+    tag_group_id INT NOT NULL,
+    name VARCHAR(32) NOT NULL,
+    color BINARY(3) NOT NULL DEFAULT 0x000000,
+    FOREIGN KEY (tag_group_id) REFERENCES tag_groups(id)
+);
 
 CREATE TABLE pictures
 (
-    CONSTRAINT PK_photos PRIMARY KEY (uid),
-    uid BIGINT AUTO_INCREMENT,
-    user_uid INT NOT NULL,
+    CONSTRAINT PK_photos PRIMARY KEY (id),
+    id BIGINT AUTO_INCREMENT,
+    user_id INT NOT NULL,
     creation_date DATETIME NOT NULL,
     edition_date DATETIME NOT NULL,
     latitude DECIMAL(8,6),
@@ -65,69 +65,70 @@ CREATE TABLE pictures
     exposure_time_den INT UNSIGNED,
     iso_speed INT UNSIGNED,
     f_number DECIMAL(4,1),
-    FOREIGN KEY (user_uid) REFERENCES users(uid)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE pictures_tags
 (
-    CONSTRAINT PK_pictures_tags PRIMARY KEY (picture_uid, tag_uid),
-    picture_uid BIGINT,
-    tag_uid INT,
-    FOREIGN KEY (picture_uid) REFERENCES pictures(uid),
-    FOREIGN KEY (tag_uid) REFERENCES tags(uid)
+    CONSTRAINT PK_pictures_tags PRIMARY KEY (picture_id, tag_id),
+    picture_id BIGINT,
+    tag_id INT,
+    FOREIGN KEY (picture_id) REFERENCES pictures(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
 
 CREATE TABLE `groups`
 (
-    CONSTRAINT PK_groups PRIMARY KEY (uid),
-    uid INT AUTO_INCREMENT,
+    CONSTRAINT PK_groups PRIMARY KEY (id),
+    id INT AUTO_INCREMENT,
+    user_id INT NOT NULL,
     name VARCHAR(32) NOT NULL,
     strategy BLOB NOT NULL,
-    owner_uid INT NOT NULL,
-    FOREIGN KEY (owner_uid) REFERENCES users(uid)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE subgroups
 (
-    CONSTRAINT PK_subgroups PRIMARY KEY (uid),
-    uid INT AUTO_INCREMENT,
-    group_uid INT NOT NULL,
+    CONSTRAINT PK_subgroups PRIMARY KEY (id),
+    id INT AUTO_INCREMENT,
+    group_id INT NOT NULL,
     name VARCHAR(32) NOT NULL,
-    FOREIGN KEY (group_uid) REFERENCES `groups`(uid)
+    FOREIGN KEY (group_id) REFERENCES `groups`(id)
 );
 
 CREATE TABLE subgroups_pictures
 (
-    CONSTRAINT PK_subgroups_pictures PRIMARY KEY (subgroup_uid, picture_uid),
-    subgroup_uid INT,
-    picture_uid BIGINT,
-    FOREIGN KEY (subgroup_uid) REFERENCES subgroups(uid),
-    FOREIGN KEY (picture_uid) REFERENCES pictures(uid)
+    CONSTRAINT PK_subgroups_pictures PRIMARY KEY (subgroup_id, picture_id),
+    subgroup_id INT,
+    picture_id BIGINT,
+    FOREIGN KEY (subgroup_id) REFERENCES subgroups(id),
+    FOREIGN KEY (picture_id) REFERENCES pictures(id)
 );
 
 CREATE TABLE shared_subgroups
 (
-    CONSTRAINT PK_shared_subgroups PRIMARY KEY (user_uid, subgroup_uid),
-    user_uid INT,
-    subgroup_uid INT,
+    CONSTRAINT PK_shared_subgroups PRIMARY KEY (user_id, subgroup_id),
+    user_id INT,
+    subgroup_id INT,
     type ENUM('unconfirmed', 'sync', 'preserve') DEFAULT 'unconfirmed' NOT NULL,
-    FOREIGN KEY (user_uid) REFERENCES users(uid),
-    FOREIGN KEY (subgroup_uid) REFERENCES subgroups(uid)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (subgroup_id) REFERENCES subgroups(id)
 );
 
-CREATE TABLE hierarchy
+CREATE TABLE hierarchies
 (
-    CONSTRAINT PK_hierarchy PRIMARY KEY (uid),
-    uid INT AUTO_INCREMENT,
+    CONSTRAINT PK_hierarchy PRIMARY KEY (id),
+    id INT AUTO_INCREMENT,
+    user_id INT NOT NULL,
     name VARCHAR(32) NOT NULL
 );
 
-CREATE TABLE hierarchy_groups
+CREATE TABLE hierarchies_groups
 (
-    CONSTRAINT PK_hierarchy_groups PRIMARY KEY (hierarchy_uid, group_uid),
-    hierarchy_uid INT,
-    group_uid INT,
-    parent_subgroup_uid INT NOT NULL ,
-    FOREIGN KEY (hierarchy_uid) REFERENCES hierarchy(uid),
-    FOREIGN KEY (group_uid) REFERENCES `groups`(uid)
+    CONSTRAINT PK_hierarchy_groups PRIMARY KEY (hierarchy_id, group_id),
+    hierarchy_id INT,
+    group_id INT,
+    parent_subgroup_id INT NOT NULL ,
+    FOREIGN KEY (hierarchy_id) REFERENCES hierarchies(id),
+    FOREIGN KEY (group_id) REFERENCES `groups`(id)
 );

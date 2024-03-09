@@ -1,2 +1,12 @@
-DROP TABLE IF EXISTS pages;
-DROP TABLE IF EXISTS books;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS shares_auto_accept;
+DROP TABLE IF EXISTS tag_groups;
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS pictures;
+DROP TABLE IF EXISTS pictures_tags;
+DROP TABLE IF EXISTS `groups`;
+DROP TABLE IF EXISTS subgroups;
+DROP TABLE IF EXISTS subgroups_pictures;
+DROP TABLE IF EXISTS shared_subgroups;
+DROP TABLE IF EXISTS hierarchy;
+DROP TABLE IF EXISTS hierarchy_groups;
