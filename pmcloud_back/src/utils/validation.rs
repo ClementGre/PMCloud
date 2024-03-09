@@ -30,7 +30,7 @@ impl From<ValidationErrors> for ValidationErrorResponse {
     }
 }
 
-pub fn validate_input<T: Validate>(data: T) -> Result<(), ErrorResponder> {
+pub fn validate_input<T: Validate>(data: &Json<T>) -> Result<(), ErrorResponder> {
     if let Err(errors) = data.validate() {
         return Err(ErrorResponder::UnprocessableEntityFields(Json(ValidationErrorResponse::from(errors))));
     }

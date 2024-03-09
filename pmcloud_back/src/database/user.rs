@@ -1,10 +1,8 @@
-use diesel::{Associations, Identifiable, Queryable, Selectable};
+use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use time::PrimitiveDateTime;
 use crate::database::schema::*;
 
-use crate::database::schema::UserConfirmAction;
-
-#[derive(Queryable, Selectable, Identifiable, Debug, PartialEq)]
+#[derive(Queryable, Selectable, Identifiable, Insertable, Debug, PartialEq)]
 #[diesel(primary_key(id))]
 #[diesel(table_name = users)]
 pub struct User {
@@ -14,11 +12,11 @@ pub struct User {
     pub password_hash: String,
     pub confirm_date: PrimitiveDateTime,
     pub confirm_action: UserConfirmAction,
-    pub confirm_token: Vec<u8>,
+    pub confirm_token: Option<Vec<u8>>,
     pub confirm_code: u16,
     pub confirm_code_trials: u8,
     pub auth_token: Vec<u8>,
-    pub status: String,
+    pub status: UserStatus,
     pub storage_count_mo: u32,
 }
 

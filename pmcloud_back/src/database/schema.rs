@@ -1,14 +1,14 @@
 use diesel::sql_types::SqlType;
 use diesel::query_builder::QueryId;
-use diesel::{table, joinable, allow_tables_to_appear_in_same_query};
+use diesel::{table, joinable, allow_tables_to_appear_in_same_query, Queryable};
 
-#[derive(SqlType, QueryId, Debug, PartialEq)]
+#[derive(Debug, PartialEq, diesel_derive_enum::DbEnum)]
 pub enum UserConfirmAction {
     Signup,
     Signin,
     DeleteAccount,
 }
-#[derive(SqlType, QueryId, Debug, PartialEq)]
+#[derive(Debug, PartialEq, diesel_derive_enum::DbEnum)]
 pub enum UserStatus {
     Unconfirmed,
     Normal,
@@ -17,21 +17,22 @@ pub enum UserStatus {
 }
 table! {
     use diesel::sql_types::*;
-    use super::{UserConfirmAction, UserStatus};
+    use super::{UserConfirmActionMapping, UserStatusMapping};
     users (id) {
         id -> Unsigned<Int4>,
         name -> Varchar,
         email -> Varchar,
-        /// 60 character
+        // 60 character
         password_hash -> Char,
         confirm_date -> Datetime,
-        confirm_action -> UserConfirmAction,
-        /// 16 byte
-        confirm_token -> Binary,
+        confirm_action -> UserConfirmActionMapping,
+        // 16 byte
+        confirm_token -> Nullable<Binary>,
         confirm_code -> Unsigned<Smallint>,
         confirm_code_trials -> Unsigned<Tinyint>,
+        // 16 byte, 32 hex characters
         auth_token -> Binary,
-        status -> UserStatus,
+        status -> UserStatusMapping,
         storage_count_mo -> Unsigned<Int4>,
     }
 }
@@ -69,7 +70,7 @@ table! {
 joinable!(tags -> tag_groups (tag_group_id));
 allow_tables_to_appear_in_same_query!(tags, tag_groups);
 
-#[derive(SqlType, QueryId, Debug, PartialEq)]
+#[derive(Debug, PartialEq, diesel_derive_enum::DbEnum)]
 pub enum PictureOrientation {
     Unspecified,
     Normal,
@@ -84,7 +85,7 @@ pub enum PictureOrientation {
 
 table! {
     use diesel::sql_types::*;
-    use super::PictureOrientation;
+    use super::PictureOrientationMapping;
     pictures (id) {
         id -> Unsigned<Int8>,
         user_id -> Unsigned<Int4>,
@@ -93,7 +94,7 @@ table! {
         latitude -> Nullable<Decimal>,
         longitude -> Nullable<Decimal>,
         altitude -> Nullable<Int2>,
-        orientation -> PictureOrientation,
+        orientation -> PictureOrientationMapping,
         width -> Unsigned<Int2>,
         height -> Unsigned<Int2>,
         camera_brand -> Nullable<Varchar>,
@@ -151,7 +152,7 @@ joinable!(subgroups_pictures -> pictures (picture_id));
 allow_tables_to_appear_in_same_query!(subgroups_pictures, subgroups);
 allow_tables_to_appear_in_same_query!(subgroups_pictures, pictures);
 
-#[derive(SqlType, QueryId, Debug, PartialEq)]
+#[derive(Debug, PartialEq, diesel_derive_enum::DbEnum)]
 pub enum SharedSubgroupType {
     Unconfirmed,
     Sync,
@@ -159,12 +160,12 @@ pub enum SharedSubgroupType {
 }
 table! {
     use diesel::sql_types::*;
-    use super::SharedSubgroupType;
+    use super::SharedSubgroupTypeMapping;
     shared_subgroups (user_id, subgroup_id) {
         user_id -> Unsigned<Int4>,
         subgroup_id -> Unsigned<Int4>,
         #[sql_name="type"]
-        pic_type -> SharedSubgroupType,
+        pic_type -> SharedSubgroupTypeMapping,
     }
 }
 joinable!(shared_subgroups -> subgroups (subgroup_id));

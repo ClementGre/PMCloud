@@ -10,11 +10,14 @@ libunftp = "=0.18.8"
 rocket = { version = "0.5.0", features = ["json"] }
 tracing-attributes = "0.1.27"
 tokio = "1.36.0"
-diesel = { version = "2.1.4", features = ["mysql_backend", "mysql", "r2d2", ] }
+diesel = { version = "2.1.4", features = ["mysql_backend", "mysql", "r2d2", "time"] }
 diesel_migrations = "2.1.0"
 dotenvy = "0.15.7"
-diesel-derive-enum = { version = "2.1.0", festures = ["mysql"] }
+diesel-derive-enum = { version = "2.1.0", features = ["mysql"] }
 time = { version = "0.3.34", features = ["macros"] }
 bigdecimal = "0.4.3"
 serde = { version = "1.0", features = ["derive"] }
 validator = { version = "0.17.0", features = ["derive"] }
+hex = "0.4.3"
+pwhash = "1"
+rand = "0.8.5"
