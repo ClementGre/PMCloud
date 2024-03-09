@@ -7,11 +7,11 @@ use crate::database::{user::User, picture::Picture};
 #[diesel(belongs_to(User, foreign_key = user_id))]
 #[diesel(table_name = tag_groups)]
 pub struct TagGroup {
-    pub id: i32,
-    pub user_id: i32,
+    pub id: u32,
+    pub user_id: u32,
     pub name: String,
     pub is_multiple: bool,
-    pub default_tag_id: Option<i32>,
+    pub default_tag_id: Option<u32>,
 }
 
 #[derive(Queryable, Selectable, Identifiable, Associations, Debug, PartialEq)]
@@ -19,8 +19,8 @@ pub struct TagGroup {
 #[diesel(belongs_to(TagGroup))]
 #[diesel(table_name = tags)]
 pub struct Tag {
-    pub id: i32,
-    pub tag_group_id: i32,
+    pub id: u32,
+    pub tag_group_id: u32,
     pub name: String,
     pub color: Vec<u8>,
 }
@@ -31,8 +31,8 @@ pub struct Tag {
 #[diesel(belongs_to(Tag))]
 #[diesel(table_name = pictures_tags)]
 pub struct PictureTag {
-    pub picture_id: i64,
-    pub tag_id: i32,
+    pub picture_id: u64,
+    pub tag_id: u32,
 }
 
 impl TagGroup {}

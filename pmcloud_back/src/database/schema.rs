@@ -19,7 +19,7 @@ table! {
     use diesel::sql_types::*;
     use super::{UserConfirmAction, UserStatus};
     users (id) {
-        id -> Int4,
+        id -> Unsigned<Int4>,
         name -> Varchar,
         email -> Varchar,
         /// 60 character
@@ -28,18 +28,18 @@ table! {
         confirm_action -> UserConfirmAction,
         /// 16 byte
         confirm_token -> Binary,
-        confirm_code -> Smallint,
-        confirm_code_trials -> Tinyint,
+        confirm_code -> Unsigned<Smallint>,
+        confirm_code_trials -> Unsigned<Tinyint>,
         auth_token -> Binary,
         status -> UserStatus,
-        storage_count_mo -> Int4,
+        storage_count_mo -> Unsigned<Int4>,
     }
 }
 
 table! {
     shares_auto_accept (user_id_acceptor, user_id_sharer) {
-        user_id_acceptor -> Int4,
-        user_id_sharer -> Int4,
+        user_id_acceptor -> Unsigned<Int4>,
+        user_id_sharer -> Unsigned<Int4>,
     }
 }
 joinable!(shares_auto_accept -> users (user_id_acceptor));
@@ -48,11 +48,11 @@ allow_tables_to_appear_in_same_query!(shares_auto_accept, users);
 
 table! {
     tag_groups (id) {
-        id -> Int4,
-        user_id -> Int4,
+        id -> Unsigned<Int4>,
+        user_id -> Unsigned<Int4>,
         name -> Varchar,
         is_multiple -> Bool,
-        default_tag_id -> Nullable<Int4>,
+        default_tag_id -> Nullable<Unsigned<Int4>>,
     }
 }
 joinable!(tag_groups -> users (user_id));
@@ -60,8 +60,8 @@ allow_tables_to_appear_in_same_query!(tag_groups, users);
 
 table! {
     tags (id) {
-        id -> Int4,
-        tag_group_id -> Int4,
+        id -> Unsigned<Int4>,
+        tag_group_id -> Unsigned<Int4>,
         name -> Varchar,
         color -> Binary,
     }
@@ -86,22 +86,22 @@ table! {
     use diesel::sql_types::*;
     use super::PictureOrientation;
     pictures (id) {
-        id -> Int8,
-        user_id -> Int4,
+        id -> Unsigned<Int8>,
+        user_id -> Unsigned<Int4>,
         creation_date -> Datetime,
         edition_date -> Datetime,
         latitude -> Nullable<Decimal>,
         longitude -> Nullable<Decimal>,
         altitude -> Nullable<Int2>,
         orientation -> PictureOrientation,
-        width -> Int2,
-        height -> Int2,
+        width -> Unsigned<Int2>,
+        height -> Unsigned<Int2>,
         camera_brand -> Nullable<Varchar>,
         camera_model -> Nullable<Varchar>,
         focal_length -> Nullable<Decimal>,
-        exposure_time_num -> Nullable<Int4>,
-        exposure_time_den -> Nullable<Int4>,
-        iso_speed -> Nullable<Int4>,
+        exposure_time_num -> Nullable<Unsigned<Int4>>,
+        exposure_time_den -> Nullable<Unsigned<Int4>>,
+        iso_speed -> Nullable<Unsigned<Int4>>,
         f_number -> Nullable<Decimal>,
     }
 }
@@ -110,8 +110,8 @@ allow_tables_to_appear_in_same_query!(pictures, users);
 
 table! {
     pictures_tags (picture_id, tag_id) {
-        picture_id -> Int8,
-        tag_id -> Int4,
+        picture_id -> Unsigned<Int8>,
+        tag_id -> Unsigned<Int4>,
     }
 }
 joinable!(pictures_tags -> pictures (picture_id));
@@ -121,8 +121,8 @@ allow_tables_to_appear_in_same_query!(pictures_tags, tags);
 
 table! {
     groups (id) {
-        id -> Int4,
-        user_id -> Int4,
+        id -> Unsigned<Int4>,
+        user_id -> Unsigned<Int4>,
         name -> Varchar,
         strategy -> Blob,
     }
@@ -132,8 +132,8 @@ allow_tables_to_appear_in_same_query!(groups, users);
 
 table! {
     subgroups (id) {
-        id -> Int4,
-        group_id -> Int4,
+        id -> Unsigned<Int4>,
+        group_id -> Unsigned<Int4>,
         name -> Varchar,
     }
 }
@@ -142,8 +142,8 @@ allow_tables_to_appear_in_same_query!(subgroups, groups);
 
 table! {
     subgroups_pictures (subgroup_id, picture_id) {
-        subgroup_id -> Int4,
-        picture_id -> Int8,
+        subgroup_id -> Unsigned<Int4>,
+        picture_id -> Unsigned<Int8>,
     }
 }
 joinable!(subgroups_pictures -> subgroups (subgroup_id));
@@ -161,8 +161,8 @@ table! {
     use diesel::sql_types::*;
     use super::SharedSubgroupType;
     shared_subgroups (user_id, subgroup_id) {
-        user_id -> Int4,
-        subgroup_id -> Int4,
+        user_id -> Unsigned<Int4>,
+        subgroup_id -> Unsigned<Int4>,
         #[sql_name="type"]
         pic_type -> SharedSubgroupType,
     }
@@ -174,8 +174,8 @@ allow_tables_to_appear_in_same_query!(shared_subgroups, users);
 
 table! {
     hierarchies (id) {
-        id -> Int4,
-        user_id -> Int4,
+        id -> Unsigned<Int4>,
+        user_id -> Unsigned<Int4>,
         name -> Varchar,
     }
 }
@@ -184,9 +184,9 @@ allow_tables_to_appear_in_same_query!(hierarchies, users);
 
 table! {
     hierarchies_groups (hierarchy_id, group_id) {
-        hierarchy_id -> Int4,
-        group_id -> Int4,
-        parent_subgroup_id -> Int4,
+        hierarchy_id -> Unsigned<Int4>,
+        group_id -> Unsigned<Int4>,
+        parent_subgroup_id -> Unsigned<Int4>,
     }
 }
 joinable!(hierarchies_groups -> hierarchies (hierarchy_id));

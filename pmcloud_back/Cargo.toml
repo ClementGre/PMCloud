@@ -17,3 +17,4 @@ diesel-derive-enum = { version = "2.1.0", festures = ["mysql"] }
 time = { version = "0.3.34", features = ["macros"] }
 bigdecimal = "0.4.3"
 serde = { version = "1.0", features = ["derive"] }
+validator = { version = "0.17.0", features = ["derive"] }

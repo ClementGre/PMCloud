@@ -7,8 +7,8 @@ use crate::database::{user::User, group::{Group, Subgroup}};
 #[diesel(belongs_to(User))]
 #[diesel(table_name = hierarchies)]
 pub struct Hierarchy {
-    pub id: i32,
-    pub user_id: i32,
+    pub id: u32,
+    pub user_id: u32,
     pub name: String,
 }
 
@@ -19,9 +19,9 @@ pub struct Hierarchy {
 #[diesel(belongs_to(Subgroup, foreign_key = parent_subgroup_id))]
 #[diesel(table_name = hierarchies_groups)]
 pub struct HierarchyGroups {
-    pub hierarchy_id: i32,
-    pub group_id: i32,
-    pub parent_subgroup_id: i32,
+    pub hierarchy_id: u32,
+    pub group_id: u32,
+    pub parent_subgroup_id: u32,
 }
 
 impl Hierarchy {}

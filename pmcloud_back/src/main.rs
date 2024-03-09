@@ -1,3 +1,13 @@
+#[macro_use] extern crate rocket;
+
+use diesel::migration::MigrationSource;
+use diesel::prelude::*;
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+
+use crate::api::auth::signup::auth_signup;
+use crate::database::database::{get_connection, get_connection_pool};
+use crate::utils::errors_catcher::{bad_request, internal_error, not_found, unauthorized, unprocessable_entity};
+
 mod api {
     pub mod admin {
         pub mod admin;
@@ -27,16 +37,9 @@ mod grouping {
 }
 mod utils {
     pub mod utils;
+    pub mod errors_catcher;
+    pub mod validation;
 }
-
-#[macro_use] extern crate rocket;
-
-use diesel::migration::MigrationSource;
-use crate::database::database::{get_connection, get_connection_pool};
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use diesel::prelude::*;
-use crate::api::auth::signup::auth_signup;
-
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
@@ -51,6 +54,7 @@ fn rocket() -> _ {
     rocket::build()
         .manage(get_connection_pool())
         .mount("/", routes![auth_signup])
+        .register("/", catchers![not_found, internal_error, bad_request, unauthorized, unprocessable_entity])
 }
 
 

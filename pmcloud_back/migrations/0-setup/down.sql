@@ -8,5 +8,5 @@ DROP TABLE IF EXISTS `groups`;
 DROP TABLE IF EXISTS subgroups;
 DROP TABLE IF EXISTS subgroups_pictures;
 DROP TABLE IF EXISTS shared_subgroups;
-DROP TABLE IF EXISTS hierarchy;
-DROP TABLE IF EXISTS hierarchy_groups;
+DROP TABLE IF EXISTS hierarchies;
+DROP TABLE IF EXISTS hierarchies_groups;
