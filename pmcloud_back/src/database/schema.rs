@@ -1,6 +1,10 @@
-use diesel::sql_types::SqlType;
+use diesel::sql_types::{Binary, Nullable, VarChar, SqlType};
 use diesel::query_builder::QueryId;
-use diesel::{table, joinable, allow_tables_to_appear_in_same_query, Queryable};
+use diesel::{table, joinable, allow_tables_to_appear_in_same_query, Queryable, define_sql_function};
+
+define_sql_function! { fn last_insert_id() -> Unsigned<Bigint> }
+define_sql_function! { fn inet6_ntoa(ip: Nullable<Binary>) -> Nullable<VarChar> }
+define_sql_function! { fn inet6_aton(ip: Nullable<VarChar>) -> Nullable<Varbinary> }
 
 #[derive(Debug, PartialEq, diesel_derive_enum::DbEnum)]
 pub enum UserConfirmAction {
@@ -24,18 +28,31 @@ table! {
         email -> Varchar,
         // 60 character
         password_hash -> Char,
+        creation_date -> Datetime,
         confirm_date -> Datetime,
         confirm_action -> UserConfirmActionMapping,
         // 16 byte
         confirm_token -> Nullable<Binary>,
-        confirm_code -> Unsigned<Smallint>,
+        confirm_code -> Nullable<Unsigned<Smallint>>,
         confirm_code_trials -> Unsigned<Tinyint>,
-        // 16 byte, 32 hex characters
-        auth_token -> Binary,
         status -> UserStatusMapping,
         storage_count_mo -> Unsigned<Int4>,
     }
 }
+
+table! {
+    auth_tokens (user_id, token) {
+        user_id -> Unsigned<Int4>,
+        token -> Binary,
+        last_session_id -> Unsigned<Smallint>,
+        creation_date -> Datetime,
+        last_use_date -> Datetime,
+        user_agent -> Nullable<Varchar>,
+        ip_address -> Nullable<Varbinary>,
+    }
+}
+joinable!(auth_tokens -> users (user_id));
+allow_tables_to_appear_in_same_query!(auth_tokens, users);
 
 table! {
     shares_auto_accept (user_id_acceptor, user_id_sharer) {

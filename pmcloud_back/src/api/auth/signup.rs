@@ -1,4 +1,7 @@
-use diesel::{insert_into, RunQueryDsl};
+use diesel::{ExpressionMethods, insert_into, QueryDsl, RunQueryDsl, select};
+use diesel::associations::HasTable;
+use diesel::dsl::Nullable;
+use diesel::sql_types::Binary;
 use pwhash::bcrypt;
 use rocket::http::Status;
 use rocket::response::status;
@@ -9,11 +12,12 @@ use time::{OffsetDateTime, PrimitiveDateTime};
 use validator::{Validate, ValidateDoesNotContain, ValidationError, ValidationErrors};
 
 use crate::database::database::DBPool;
-use crate::database::schema::{UserConfirmAction, users, UserStatus};
+use crate::database::schema::{auth_tokens::dsl::*, inet6_aton, last_insert_id, UserConfirmAction, users::dsl::*, UserStatus};
 use crate::database::user::User;
+use crate::utils::auth::DeviceInfo;
 use crate::utils::errors_catcher::{ErrorResponder, ErrorResponse};
+use crate::utils::utils::random_token;
 use crate::utils::validation::validate_input;
-use rand::{RngCore, rngs::OsRng};
 
 #[derive(Deserialize, Debug, Validate)]
 pub struct SignupData {
@@ -28,52 +32,70 @@ pub struct SignupData {
 #[derive(Serialize, Debug)]
 pub struct SignupResponse {
     pub(crate) user_id: u32,
+    pub(crate) session_id: u16,
     pub(crate) auth_token: String,
 }
 
 #[get("/auth/signup", data = "<data>")]
-pub fn auth_signup(data: Json<SignupData>, db: &rocket::State<DBPool>, user: Option<User>) -> Result<Json<SignupResponse>, ErrorResponder> {
-    validate_input(&data)?;
-
+pub fn auth_signup(data: Json<SignupData>, db: &rocket::State<DBPool>, device_info: DeviceInfo) -> Result<Json<SignupResponse>, ErrorResponder> {
+    // validate_input(&data)?;
     let conn = &mut db.get().unwrap();
-    let now = OffsetDateTime::now_utc();
 
-    let mut auth_token = vec![0u8; 16];
-    OsRng.fill_bytes(&mut auth_token);
+    // if user.is_some() {
+    //     println!("User: {:?}", user);
+    //     return Err(ErrorResponder::Unauthorized(Json(ErrorResponse {
+    //         message: "User already signed in".to_string()
+    //     })));
+    // }
 
-    if user.is_some() {
-        println!("User: {:?}", user);
-        return Err(ErrorResponder::Unauthorized(Json(ErrorResponse {
-            message: "User already signed in".to_string()
+    let result = insert_into(users)
+        .values((
+            name.eq(data.name.clone()),
+            email.eq(data.email.clone()),
+            password_hash.eq(bcrypt::hash(data.password.clone()).unwrap())
+        ))
+        .execute(conn).map_err(|e| {
+        ErrorResponder::InternalError(Json(ErrorResponse {
+            message: format!("Failed to insert user: {}", e)
+        }))
+    })?;
+    if result == 0 {
+        return Err(ErrorResponder::InternalError(Json(ErrorResponse {
+            message: "Failed to insert user. An account with the same email might exist.".to_string()
         })));
     }
+    let uid = select(last_insert_id()).get_result::<u64>(conn).map_err(|e| {
+        ErrorResponder::InternalError(Json(ErrorResponse {
+            message: format!("Failed to get last insert id: {}", e)
+        }))
+    })? as u32;
 
-    let user = User {
-        id: 0,
-        name: data.name.clone(),
-        email: data.email.clone(),
-        password_hash: bcrypt::hash(data.password.clone()).unwrap(),
-        confirm_date: PrimitiveDateTime::new(now.date(), now.time()),
-        confirm_action: UserConfirmAction::Signup,
-        confirm_token: None,
-        confirm_code: 0,
-        confirm_code_trials: 0,
-        auth_token: auth_token.clone(),
-        status: UserStatus::Unconfirmed,
-        storage_count_mo: 0,
-    };
+    // Inserting auth token
 
-    insert_into(users::dsl::users)
-        .values(&user)
+    println!("Device info: {:?}", device_info);
+
+    let auth_token = random_token(32);
+    let session_id = rand::random::<u16>();
+    let result = insert_into(auth_tokens)
+        .values((
+            user_id.eq(uid),
+            token.eq(auth_token.clone()),
+            last_session_id.eq(session_id),
+            user_agent.eq(device_info.user_agent),
+            ip_address.eq(inet6_aton(device_info.ip_address))
+        ))
         .execute(conn).map_err(|e| {
-            ErrorResponder::InternalError(Json(ErrorResponse {
-                message: format!("Failed to insert user: {}", e)
-            }))
-        })?;
+        ErrorResponder::InternalError(Json(ErrorResponse {
+            message: format!("Failed to insert auth token: {}", e)
+        }))
+    })?;
+
+    // TODO: Send confirmation email
 
     // If validation passes, proceed with your logic
     Ok(Json(SignupResponse {
-        user_id: user.id,
+        user_id: uid,
+        session_id,
         auth_token: hex::encode(auth_token),
     }))
 }
