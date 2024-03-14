@@ -5,7 +5,7 @@ CREATE TABLE users
     email VARCHAR(256) NOT NULL UNIQUE,
     password_hash CHAR(60) NOT NULL,
     creation_date DATETIME NOT NULL DEFAULT NOW(),
-    confirm_date DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00',
+    confirm_date DATETIME NOT NULL DEFAULT NOW(),
     confirm_action ENUM('signup', 'signin', 'delete_account') NOT NULL DEFAULT 'signup',
     confirm_token BINARY(16) DEFAULT NULL,
     confirm_code SMALLINT UNSIGNED DEFAULT NULL,
@@ -20,10 +20,9 @@ CREATE TABLE auth_tokens
     CONSTRAINT PK_auth_tokens PRIMARY KEY (user_id, token),
     user_id INT UNSIGNED NOT NULL,
     token BINARY(32) NOT NULL,
-    last_session_id SMALLINT UNSIGNED NOT NULL,
     creation_date DATETIME NOT NULL DEFAULT NOW(),
-    last_use_date DATETIME NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-    user_agent VARCHAR(128),
+    last_use_date DATETIME NOT NULL DEFAULT NOW(),
+    device_string VARCHAR(128),
     ip_address VARBINARY(16),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

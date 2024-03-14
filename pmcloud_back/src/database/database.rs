@@ -2,9 +2,10 @@ use diesel::mysql::MysqlConnection;
 use diesel::prelude::*;
 use dotenvy::dotenv;
 use std::env;
-use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 
 pub type DBPool = Pool<ConnectionManager<MysqlConnection>>;
+pub type DBConn = PooledConnection<ConnectionManager<MysqlConnection>>;
 
 pub fn get_connection() -> MysqlConnection {
     let url = database_url_for_env();

@@ -1,6 +1,6 @@
 use bigdecimal::BigDecimal;
+use chrono::NaiveDateTime;
 use diesel::{Associations, Identifiable, Queryable, Selectable};
-use time::PrimitiveDateTime;
 
 use crate::database::schema::PictureOrientation;
 use crate::database::schema::*;
@@ -13,8 +13,8 @@ use crate::database::user::User;
 pub struct Picture {
     pub id: u64,
     pub user_id: u32,
-    pub creation_date: PrimitiveDateTime,
-    pub edition_date: PrimitiveDateTime,
+    pub creation_date: NaiveDateTime,
+    pub edition_date: NaiveDateTime,
     /// 6 decimals, maximum 100.000000°
     pub latitude: Option<BigDecimal>,
     /// 6 decimals, maximum 1000.000000°

@@ -1,6 +1,6 @@
 <template>
   <main>
-    <p>Welcome on PictureManager Cloud !</p>
+    <p>PictureManager Cloud</p>
     <NuxtLink to="/">Go to the app</NuxtLink>
   </main>
 </template>

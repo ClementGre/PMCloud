@@ -1,7 +1,7 @@
 <template>
   <div>
-    <p>Default layout for landing page and other lambda pages.</p>
     <NuxtPage />
+    <Footer/>
   </div>
 </template>
 
