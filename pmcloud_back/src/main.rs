@@ -30,6 +30,7 @@ mod database {
     pub mod database;
     pub mod schema;
     pub mod user;
+    pub mod auth_token;
     pub mod tags;
     pub mod picture;
     pub mod group;

@@ -1,18 +1,18 @@
 use std::fmt::Display;
-use std::ops::{Add, AddAssign};
-use chrono::{Duration, TimeDelta, Utc};
+use std::ops::AddAssign;
+
 use diesel::prelude::*;
 use diesel::prelude::*;
-use diesel::{select, update};
 use rocket::form::validate::Contains;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome};
 use rocket::Request;
-use user_agent_parser::{Device, Engine, OS, UserAgentParser};
+use user_agent_parser::{Device, Engine, OS};
 
+use crate::database::auth_token::AuthToken;
 use crate::database::database::DBPool;
 use crate::database::schema::*;
-use crate::database::user::{AuthToken, User};
+use crate::database::user::User;
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for User {
@@ -45,9 +45,11 @@ impl<'r> FromRequest<'r> for User {
         Outcome::Error((Status::Unauthorized, ()))
     }
 }
+
 struct UnauthenticatedUser {
     user: User,
 }
+
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for UnauthenticatedUser {
     type Error = ();
@@ -96,12 +98,12 @@ impl<'r> FromRequest<'r> for DeviceInfo {
 
         // removing port from ip address even if it is an ipv6
         if let Some(ip) = ip_address.clone() {
-            if ip.contains(':'){
+            if ip.contains(':') {
                 if ip.chars().filter(|c| *c == 'z').count() > 1 {
                     if ip.starts_with('[') && ip.contains("]") {
                         ip_address = Some(ip[1..ip.find("]").unwrap()].to_string());
                     }
-                }else{
+                } else {
                     ip_address = Some(ip[0..ip.find(":").unwrap()].to_string());
                 }
             }
@@ -122,7 +124,7 @@ fn device_str(device: Device, os: OS, engine: Engine) -> String {
     }
     if let Some(name) = device.name {
         device_str.add_assign(format!("{} ", name).as_str());
-    }else if let Some(model) = device.model {
+    } else if let Some(model) = device.model {
         device_str.add_assign(format!("{} ", model).as_str());
     }
 

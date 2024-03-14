@@ -9,10 +9,11 @@ use rocket::serde::{Deserialize, json::Json};
 use rocket::serde::json::json;
 use serde::Serialize;
 use validator::{Validate, ValidateDoesNotContain, ValidationError, ValidationErrors};
+use crate::database::auth_token::AuthToken;
 
 use crate::database::database::DBPool;
 use crate::database::schema::{auth_tokens::dsl::*, inet6_aton, last_insert_id, UserConfirmAction, users::dsl::*, UserStatus};
-use crate::database::user::{AuthToken, User};
+use crate::database::user::User;
 use crate::utils::auth::DeviceInfo;
 use crate::utils::errors_catcher::{ErrorResponder, ErrorResponse};
 use crate::utils::utils::random_token;
