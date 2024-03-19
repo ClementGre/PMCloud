@@ -15,7 +15,7 @@ use crate::database::database::DBPool;
 use crate::database::schema::{auth_tokens::dsl::*, inet6_aton, last_insert_id, UserConfirmAction, users::dsl::*, UserStatus};
 use crate::database::user::User;
 use crate::utils::auth::DeviceInfo;
-use crate::utils::errors_catcher::{ErrorResponder, ErrorResponse};
+use crate::utils::errors_catcher::{ErrorResponder, ErrorResponse, ErrorType};
 use crate::utils::utils::random_token;
 use crate::utils::validation::validate_input;
 
@@ -54,19 +54,13 @@ pub fn auth_signup(data: Json<SignupData>, db: &rocket::State<DBPool>, device_in
             password_hash.eq(bcrypt::hash(data.password.clone()).unwrap())
         ))
         .execute(conn).map_err(|e| {
-        ErrorResponder::InternalError(Json(ErrorResponse {
-            message: format!("Failed to insert user: {}", e)
-        }))
+        ErrorType::DatabaseError("Failed to insert user".to_string(), e).to_responder()
     })?;
     if result == 0 {
-        return Err(ErrorResponder::InternalError(Json(ErrorResponse {
-            message: "Failed to insert user. An account with the same email might exist.".to_string()
-        })));
+        return ErrorType::InvalidInput("Failed to insert user. An account with the same email might exist.".to_string()).to_err();
     }
     let uid = select(last_insert_id()).get_result::<u64>(conn).map_err(|e| {
-        ErrorResponder::InternalError(Json(ErrorResponse {
-            message: format!("Failed to get last insert id: {}", e)
-        }))
+        ErrorType::DatabaseError("Failed to get last insert id".to_string(), e).to_responder()
     })? as u32;
 
     let auth_token = AuthToken::insert_token_for_user(conn, uid, device_info)?;

@@ -38,7 +38,7 @@ impl<'r> FromRequest<'r> for User {
         if let Some((user, Some(auth))) = result.ok() {
             let result = auth.update_last_use_date(conn);
             if result.is_err() {
-                // TODO: either log the error or disconnect the user
+                // TODO: log the error but keep the response as successful
             }
             return Outcome::Success(user);
         }
@@ -46,8 +46,8 @@ impl<'r> FromRequest<'r> for User {
     }
 }
 
-struct UnauthenticatedUser {
-    user: User,
+pub struct UnauthenticatedUser {
+    pub user: User,
 }
 
 #[rocket::async_trait]

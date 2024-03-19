@@ -11,7 +11,7 @@ use crate::database::schema::{inet6_aton, last_insert_id, UserStatus};
 use crate::database::schema::users;
 use crate::database::user::User;
 use crate::utils::auth::DeviceInfo;
-use crate::utils::errors_catcher::{ErrorResponder, ErrorResponse};
+use crate::utils::errors_catcher::{ErrorResponder, ErrorResponse, ErrorType};
 use crate::utils::utils::random_token;
 use crate::utils::validation::validate_input;
 
@@ -35,22 +35,16 @@ pub fn auth_signin(data: Json<SigninData>, db: &rocket::State<DBPool>, device_in
         .filter(users::dsl::email.eq(data.email.clone()))
         .select(User::as_select())
         .first::<User>(conn).optional().map_err(|e| {
-        ErrorResponder::InternalError(Json(ErrorResponse {
-            message: format!("An error occured: {}", e)
-        }))
+        ErrorType::DatabaseError("Failed to get user".to_string(), e).to_responder()
     })?;
     if let Some(user) = user_opt {
         if bcrypt::verify(data.password.clone(), &*user.password_hash) {
             return match user.status {
                 UserStatus::Banned => {
-                    Err(ErrorResponder::Unauthorized(Json(ErrorResponse {
-                        message: "User is banned".to_string()
-                    })))
+                    ErrorType::UserBanned.to_err()
                 }
                 UserStatus::Unconfirmed => {
-                    Err(ErrorResponder::Unauthorized(Json(ErrorResponse {
-                        message: "User is not confirmed".to_string()
-                    })))
+                    ErrorType::UserUnconfirmed.to_err()
                 }
                 _ => {
                     let auth_token = AuthToken::insert_token_for_user(conn, user.id, device_info)?;
@@ -63,7 +57,5 @@ pub fn auth_signin(data: Json<SigninData>, db: &rocket::State<DBPool>, device_in
             };
         }
     }
-    Err(ErrorResponder::Unauthorized(Json(ErrorResponse {
-        message: "Invalid email or password".to_string()
-    })))
+    ErrorType::UserNotFound.to_err()
 }

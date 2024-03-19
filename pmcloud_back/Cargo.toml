@@ -24,3 +24,4 @@ validator = { version = "0.17.0", features = ["derive"] }
 hex = "0.4.3"
 pwhash = "1"
 user-agent-parser = { version = "0.3.6", features = ["rocket"] }
+enum-kinds = "0.5.1"

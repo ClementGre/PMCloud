@@ -1,13 +1,12 @@
-use chrono::{Local, NaiveDateTime, TimeDelta, Utc};
+use chrono::{NaiveDateTime, TimeDelta, Utc};
 use diesel::{Connection, Identifiable, insert_into, Insertable, Queryable, RunQueryDsl, Selectable, update};
 use diesel::ExpressionMethods;
-use rocket::serde::json::Json;
 
 use crate::database::database::DBConn;
 use crate::database::schema::*;
 use crate::database::schema::auth_tokens;
 use crate::utils::auth::DeviceInfo;
-use crate::utils::errors_catcher::{ErrorResponder, ErrorResponse};
+use crate::utils::errors_catcher::{ErrorResponder, ErrorType};
 use crate::utils::utils::random_token;
 
 #[derive(Queryable, Selectable, Identifiable, Insertable, Debug, PartialEq)]
@@ -34,9 +33,7 @@ impl AuthToken {
                 auth_tokens::dsl::ip_address.eq(inet6_aton(device_info.ip_address))
             ))
             .execute(conn).map_err(|e| {
-            ErrorResponder::InternalError(Json(ErrorResponse {
-                message: format!("Failed to insert auth token: {}", e)
-            }))
+            ErrorType::DatabaseError("Failed to insert auth token".to_string(), e).to_responder()
         })?;
         Ok(auth_token)
     }
@@ -52,9 +49,7 @@ impl AuthToken {
                     auth_tokens::dsl::last_use_date.eq(utc_timestamp()),
                 ))
                 .execute(conn).map_err(|e| {
-                ErrorResponder::InternalError(Json(ErrorResponse {
-                    message: format!("Failed to update auth token use date: {}", e)
-                }))
+                ErrorType::DatabaseError("Failed to update auth token use date".to_string(), e).to_responder()
             })?;
         }
         Ok(())
