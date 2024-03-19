@@ -19,7 +19,17 @@ export default defineNuxtConfig({
       ripple: true,
     }
   },
-  css: ['primevue/resources/themes/aura-light-green/theme.css', 'primeicons/primeicons.css'],
+  css: [
+      'assets/css/common.styl',
+      'primevue/resources/themes/aura-light-green/theme.css',
+      'primeicons/primeicons.css'
+  ],
+  vite: {
+    css: {
+      preprocessorOptions: {
+      }
+    }
+  },
   $production: {
     routeRules: {
       '/**': { isr: true }
