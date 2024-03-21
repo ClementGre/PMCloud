@@ -10,7 +10,5 @@
 </script>
 
 <style scoped>
-* {
-  background-color: red;
-}
+
 </style>
