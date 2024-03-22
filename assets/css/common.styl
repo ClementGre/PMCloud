@@ -2,12 +2,24 @@
 
 family = -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
 
+html
+  // For the scroll inertia to take the background color of the html
+  min-height: 100%;
+
 body
   box-sizing border-box
   margin 0
   font-weight 500
   font-family family
-  background-color: var(--surface-ground);
+
+  #__nuxt
+    min-height 100vh
+    display flex
+    flex-direction column
+    justify-content stretch
+    main
+      flex-grow 1
+      background-color: var(--surface-ground);
 
 h1, h2, h3, h4, h5, h6, p
   margin: 0

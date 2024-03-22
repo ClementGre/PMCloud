@@ -1,14 +1,14 @@
 <template>
-  <div>
-    <Header/>
-    <NuxtPage />
-    <Footer/>
-  </div>
+  <Header/>
+  <NuxtPage/>
+  <Footer/>
 </template>
 
 <script setup lang="ts">
 </script>
 
-<style scoped>
-
+<style lang="stylus">
+html
+  // For the scroll inertia
+  background-color var(--primary-100)
 </style>

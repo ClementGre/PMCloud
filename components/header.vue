@@ -44,13 +44,13 @@ header
   border-bottom: 1px solid hsl(174, 53%, 90%);
 
   position fixed
+  z-index 1
   min-height 4rem
   width 100vw
 
   display flex
   justify-content space-between
   align-items stretch
-  flex-wrap wrap
 
   padding 0 1rem
   @media screen and (min-width: 600px)
