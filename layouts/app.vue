@@ -1,9 +1,11 @@
 <template>
-  <p>This is the app layout!</p>
-  <!--  Insert header-->
-  <!--  Insert leftbar-->
-  <NuxtPage/>
-  <!--  Insert rightbar-->
+  <div>
+    <p>This is the app layout!</p>
+    <!--  Insert header-->
+    <!--  Insert leftbar-->
+    <NuxtPage/>
+    <!--  Insert rightbar-->
+  </div>
 </template>
 
 <script setup lang="ts">

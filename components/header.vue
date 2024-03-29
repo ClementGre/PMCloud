@@ -16,13 +16,13 @@
       <nav>
         <ul>
           <li class="current">
-            <nuxt-link to="/"><span class="pi pi-home"/>Home</nuxt-link>
+            <nuxt-link to="/overview"><span class="pi pi-home"/>Home</nuxt-link>
           </li>
           <li>
             <nuxt-link to="/about"><span class="pi pi-info-circle"/>About</nuxt-link>
           </li>
           <li>
-            <nuxt-link to="/about"><span class="pi pi-dollar"/>Pricing</nuxt-link>
+            <nuxt-link to="/pricing"><span class="pi pi-dollar"/>Pricing</nuxt-link>
           </li>
           <li>
             <nuxt-link to="/signin"><span class="pi pi-sign-in"/>Sign in</nuxt-link>
@@ -43,7 +43,7 @@ header
   background-color: hsla(174, 53%, 90%, 0.7);
   border-bottom: 1px solid hsl(174, 53%, 90%);
 
-  position fixed
+
   z-index 1
   min-height 4rem
   width 100vw
