@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+const rootServer = useRuntimeConfig()?.public?.rootServer
 </script>
 
 <template>
@@ -10,25 +10,26 @@
       </div>
       <h2>
         PMCloud
+        <span v-if="!rootServer || true">Standalone</span>
       </h2>
     </div>
     <div class="right">
       <nav>
         <ul>
-          <li class="current">
+          <li class="current" v-if="rootServer">
             <nuxt-link to="/overview"><span class="pi pi-home"/>Home</nuxt-link>
           </li>
-          <li>
+          <li v-if="rootServer">
             <nuxt-link to="/about"><span class="pi pi-info-circle"/>About</nuxt-link>
           </li>
-          <li>
+          <li v-if="rootServer">
             <nuxt-link to="/pricing"><span class="pi pi-dollar"/>Pricing</nuxt-link>
           </li>
           <li>
             <nuxt-link to="/signin"><span class="pi pi-sign-in"/>Sign in</nuxt-link>
           </li>
           <li>
-            <nuxt-link to="/singup"><span class="pi pi-user-plus"/>Sign up</nuxt-link>
+            <nuxt-link to="/signup"><span class="pi pi-user-plus"/>Sign up</nuxt-link>
           </li>
         </ul>
       </nav>
@@ -38,14 +39,14 @@
 
 <style scoped lang="stylus">
 header
+  height 48px
+  position fixed
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   background-color: hsla(174, 53%, 90%, 0.7);
   border-bottom: 1px solid hsl(174, 53%, 90%);
 
-
   z-index 1
-  min-height 4rem
   width 100vw
 
   display flex
@@ -57,6 +58,10 @@ header
     padding 0 3rem
   @media screen and (min-width: 800px)
     padding 0 5rem
+
+  h2 span
+    font-size .8rem
+    color var(--primary-800)
 
 .left, .right
   display flex

@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@vueuse/nuxt": "^10.9.0",
     "nuxt": "^3.10.3",
     "primeicons": "^6.0.1",
     "stylus": "^0.63.0",

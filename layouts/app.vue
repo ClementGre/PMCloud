@@ -3,7 +3,7 @@
     <p>This is the app layout!</p>
     <!--  Insert header-->
     <!--  Insert leftbar-->
-    <NuxtPage/>
+    <slot/>
     <!--  Insert rightbar-->
   </div>
 </template>

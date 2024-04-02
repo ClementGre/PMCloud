@@ -7,23 +7,37 @@ const props = defineProps({
   aria: String,
   icon: String,
   small: String,
-  small_error: Boolean
+  small_error: Boolean,
+  reset_password: Boolean
 })
 
+const target = ref(null)
 const emit = defineEmits(['update:value'])
 
-const model = defineModel()
-
+let id;
+if(props.name){
+  id = props.name.toLowerCase() + '-input';
+}
 
 </script>
 
 <template>
   <div class="input-in-form">
-    <label v-if="name" for="username">{{ name }}</label>
-    <InputText :type="type"
-               :value="props.value"
-               @input="emit('update:value', $event.target.value)"
-               :aria-describedby="props.aria"/>
+    <div class="header" v-if="name">
+      <label :for="id">{{ name }}</label>
+      <label v-if="reset_password" :for="id"><nuxt-link href="/resetpassword">Forgot password?</nuxt-link></label>
+    </div>
+
+    <InputText
+        :id="id"
+        :ref="target"
+        :type="type"
+        :value="props.value"
+        @input="emit('update:value', $event.target.value)"
+        :aria-describedby="props.aria"
+        :invalid="small_error && small?.length != 0"
+        autocomplete="on"/>
+
     <small v-if="props.small"
            :style="props.small_error ? 'color: var(--red-700);' : ''">
       {{ props.small }}
@@ -32,11 +46,15 @@ const model = defineModel()
 </template>
 
 <style scoped lang="stylus">
-div
+.input-in-form
   *
     display block
-  label
+  .header
+    display flex
+    justify-content space-between
     margin-bottom 5px
+
   input
     width 100%
+
 </style>

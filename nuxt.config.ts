@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
   runtimeConfig: {
     apiSecret: '123',
+    public: {
+      rootServer: (/true/i).test(process.env.ROOT_SERVER || ""),
+    }
   },
   app: {
     head: {
@@ -18,7 +21,8 @@ export default defineNuxtConfig({
     },
   ],
   modules: [
-    'nuxt-primevue'
+    'nuxt-primevue',
+    '@vueuse/nuxt',
   ],
   primevue: {
     options: {
@@ -36,13 +40,24 @@ export default defineNuxtConfig({
       }
     }
   },
+
   $production: {
     routeRules: {
-      '/**': { isr: true }
-    }
+      // Client-side only
+      '/': { ssr: false },
+      '/admin/**': { ssr: false },
+      // Other pages default to CDN cache.
+      '/**': { isr: false, swr: false, ssr: false, prerender: false},
+    },
   },
   $development: {
     devtools: { enabled: true },
-    //
+    routeRules: {
+      // Client-side only
+      '/': { ssr: false },
+      '/admin/**': { ssr: false },
+      // Other pages default to CDN cache.
+      '/**': { isr: false, swr: false, ssr: false, prerender: false},
+    },
   }
 })

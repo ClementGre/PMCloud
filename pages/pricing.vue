@@ -1,13 +1,14 @@
 <script setup lang="ts">
 definePageMeta({
-  layout: 'default'
+  layout: 'default',
+  middleware: ['root-server-only']
 })
 
 </script>
 
 <template>
   <main>
-    pricing
+    <h1>pricing</h1>
   </main>
 </template>
 
