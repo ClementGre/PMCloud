@@ -1,11 +1,13 @@
 use diesel::sql_types::{Binary, Nullable, VarChar, SqlType};
 use diesel::query_builder::QueryId;
-use diesel::{table, joinable, allow_tables_to_appear_in_same_query, Queryable, define_sql_function};
+use diesel::{table, joinable, allow_tables_to_appear_in_same_query, Queryable};
+use diesel::expression::functions::sql_function;
+use serde::Serialize;
 
-define_sql_function! { fn last_insert_id() -> Unsigned<Bigint> }
-define_sql_function! { fn inet6_ntoa(ip: Nullable<Binary>) -> Nullable<VarChar> }
-define_sql_function! { fn inet6_aton(ip: Nullable<VarChar>) -> Nullable<Varbinary> }
-define_sql_function! { fn utc_timestamp() -> Datetime }
+sql_function! { fn last_insert_id() -> Unsigned<Bigint> }
+sql_function! { fn inet6_ntoa(ip: Nullable<Binary>) -> Nullable<VarChar> }
+sql_function! { fn inet6_aton(ip: Nullable<VarChar>) -> Nullable<Varbinary> }
+sql_function! { fn utc_timestamp() -> Datetime }
 
 #[derive(Debug, PartialEq, diesel_derive_enum::DbEnum)]
 pub enum UserConfirmAction {
@@ -13,7 +15,7 @@ pub enum UserConfirmAction {
     Signin,
     DeleteAccount,
 }
-#[derive(Debug, PartialEq, diesel_derive_enum::DbEnum)]
+#[derive(Debug, PartialEq, Serialize, diesel_derive_enum::DbEnum)]
 pub enum UserStatus {
     Unconfirmed,
     Normal,

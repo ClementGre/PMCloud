@@ -52,6 +52,7 @@ mod utils {
     pub mod errors_catcher;
     pub mod validation;
     pub mod auth;
+    pub mod mailer;
 }
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");

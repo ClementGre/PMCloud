@@ -46,37 +46,6 @@ impl<'r> FromRequest<'r> for User {
     }
 }
 
-pub struct UnauthenticatedUser {
-    pub user: User,
-}
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for UnauthenticatedUser {
-    type Error = ();
-
-    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        // get user_id and auth_token from request headers
-        let user_id = request.headers().get_one("X-User-Id").map(|s| s.parse::<u32>().ok()).flatten();
-        let auth_token = request.headers().get_one("X-Auth-Token").map(|s| hex::decode(s).ok()).flatten();
-        if user_id.is_none() || auth_token.is_none() {
-            return Outcome::Error((Status::Unauthorized, ()));
-        }
-
-        let db: &DBPool = request.rocket().state::<DBPool>().unwrap();
-        let conn = &mut db.get().unwrap();
-
-        let result = users::table
-            .filter(users::dsl::id.eq(user_id.unwrap()))
-            .select(User::as_select())
-            .first::<User>(conn);
-
-        if let Some(user) = result.ok() {
-            return Outcome::Success(UnauthenticatedUser { user });
-        }
-        Outcome::Error((Status::Unauthorized, ()))
-    }
-}
-
 
 #[derive(Debug)]
 pub struct DeviceInfo {

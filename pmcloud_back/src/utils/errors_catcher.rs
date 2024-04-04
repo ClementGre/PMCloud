@@ -34,12 +34,14 @@ pub enum ErrorType {
     NotFound(String),
     UnprocessableEntity,
     InternalError,
-    // Form validation (UnprocessableEntity for type check)
+    // Form validation (see UnprocessableEntity for type check related errors)
     InvalidInput(String),
-    // Login types
+    // Sign in / status types
     UserNotFound,
     UserBanned,
     UserUnconfirmed,
+    // Sign up types
+    EmailAlreadyExists,
     // Admin
     UserNotAdmin,
     // Database error
@@ -62,12 +64,14 @@ impl ErrorType {
             ErrorType::NotFound(path) => ErrorResponder::NotFound(Self::res(format!("Not found: {}", path), kind)),
             ErrorType::UnprocessableEntity => ErrorResponder::UnprocessableEntity(Self::res("Unprocessable entity".to_string(), kind)),
             ErrorType::InternalError => ErrorResponder::InternalError(Self::res("Internal error".to_string(), kind)),
-            // Form validation (UnprocessableEntity for type check)
+            // Form validation (see UnprocessableEntity for type check related errors)
             ErrorType::InvalidInput(msg) => ErrorResponder::UnprocessableEntity(Self::res(msg, kind)),
-            // Login
+            // Sign in / status types
             ErrorType::UserNotFound => ErrorResponder::Unauthorized(Self::res("User not found".to_string(), kind)),
             ErrorType::UserBanned => ErrorResponder::Unauthorized(Self::res("User is banned".to_string(), kind)),
             ErrorType::UserUnconfirmed => ErrorResponder::Unauthorized(Self::res("User is not confirmed".to_string(), kind)),
+            // Sign up types
+            ErrorType::EmailAlreadyExists => ErrorResponder::Unauthorized(Self::res("Email already exists".to_string(), kind)),
             // Admin
             ErrorType::UserNotAdmin => ErrorResponder::Unauthorized(Self::res("User is not an admin".to_string(), kind)),
             // Database error
