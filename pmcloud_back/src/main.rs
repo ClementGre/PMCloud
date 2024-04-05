@@ -1,9 +1,12 @@
 #[macro_use]
 extern crate rocket;
 
+use std::env;
 use diesel::migration::MigrationSource;
 use diesel::prelude::*;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use rocket::http::Method;
+use rocket_cors::{AllowedHeaders, AllowedOrigins, Cors, CorsOptions, Origins};
 use serde::Deserialize;
 use user_agent_parser::UserAgentParser;
 
@@ -66,17 +69,27 @@ fn rocket() -> _ {
     // println!("Migrations result: {:?}", res);
 
     rocket::build()
+        .attach(cors_options())
         .manage(get_connection_pool())
         .manage(UserAgentParser::from_path("user_agent_regexes.yaml").unwrap())
         .mount("/", routes![auth_signup, auth_signin, auth_status])
         .register("/", catchers![bad_request, unauthorized, not_found, unprocessable_entity, internal_error])
 }
 
-#[derive(Debug, Deserialize)]
-struct Test {
-    user_id: u32,
-    name: String,
-    age: u32,
+fn cors_options() -> Cors {
+    let origin = [env::var("FRONTEND_HOST").expect("FRONTEND_HOST must be set")];
+    CorsOptions {
+        allowed_origins: AllowedOrigins::some_exact(&origin),
+        allowed_methods: vec![Method::Get, Method::Post, Method::Put, Method::Delete]
+            .into_iter()
+            .map(From::from)
+            .collect(),
+        allowed_headers: AllowedHeaders::all(),
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()
+    .expect("Error while building CORS")
 }
 
 

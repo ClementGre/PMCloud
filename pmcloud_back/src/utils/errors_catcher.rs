@@ -17,7 +17,6 @@ pub enum ErrorResponder {
     UnprocessableEntity(Json<ErrorResponse>),
     #[response(status = 500, content_type = "json")]
     InternalError(Json<ErrorResponse>),
-
 }
 
 #[derive(Serialize)]

@@ -14,9 +14,6 @@ useSeoMeta({
   ogImage: 'https://example.com/image.png'
 })
 
-const emit = defineEmits(['set_backgrounds'])
-emit('set_backgrounds', 'var(--primary-100)')
-
 </script>
 
 <template>

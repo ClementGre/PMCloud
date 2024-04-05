@@ -26,3 +26,4 @@ user-agent-parser = { version = "0.3.6", features = ["rocket"] }
 enum-kinds = "0.5.1"
 diesel = { version = "2.1.5", features = ["mysql_backend", "mysql", "r2d2", "chrono"] }
 mail-send = "0.4.7"
+rocket_cors = "0.6.0"

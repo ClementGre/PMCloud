@@ -4,6 +4,7 @@ export default defineNuxtConfig({
         apiSecret: '123',
         public: {
             rootServer: (/true/i).test(process.env.ROOT_SERVER || ""),
+            apiUrl: process.env.API_URL || 'http://localhost:8000',
         }
     },
     app: {
@@ -30,6 +31,9 @@ export default defineNuxtConfig({
             ripple: true,
         }
     },
+    pinia: {
+        storesDirs: ['./stores/**'],
+    },
     css: [
         'assets/css/common.styl',
         'primevue/resources/themes/aura-light-green/theme.css',
@@ -40,15 +44,15 @@ export default defineNuxtConfig({
             preprocessorOptions: {}
         }
     },
-
+    routeRules: {
+        // Client-side only
+        '/': {ssr: false},
+        '/admin/**': {ssr: false},
+        // Other pages default to CDN cache.
+        '/**': {isr: false, swr: false, ssr: true, prerender: false},
+    },
     $production: {
-        routeRules: {
-            // Client-side only
-            '/': {ssr: false},
-            '/admin/**': {ssr: false},
-            // Other pages default to CDN cache.
-            '/**': {isr: false, swr: false, ssr: false, prerender: false},
-        },
+
     },
     $development: {
         devtools: {
@@ -56,13 +60,6 @@ export default defineNuxtConfig({
             timeline: {
                 enabled: true
             }
-        },
-        routeRules: {
-            // Client-side only
-            '/': {ssr: false},
-            '/admin/**': {ssr: false},
-            // Other pages default to CDN cache.
-            '/**': {isr: false, swr: false, ssr: false, prerender: false},
-        },
+        }
     }
 })

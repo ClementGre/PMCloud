@@ -1,16 +1,12 @@
 <script setup lang="ts">
 
-const set_backgrounds = (top: string) => {
-  console.log('Setting backgrounds...', top)
-}
-
 </script>
 
 <template>
   <div>
     <Header/>
     <div class="main-content">
-      <slot @set_backgrounds="set_backgrounds"/>
+      <slot/>
     </div>
     <Footer/>
   </div>

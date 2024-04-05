@@ -1,12 +1,13 @@
+<script setup lang="ts">
+await useUserStore().fetchStatus()
+
+</script>
+
 <template>
   <NuxtLayout>
     <NuxtPage/>
   </NuxtLayout>
 </template>
-
-<script setup lang="ts">
-
-</script>
 
 <style lang="stylus">
 :root

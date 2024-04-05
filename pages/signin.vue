@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import {useEmailValidator, validateEmail} from "~/composables/validators";
+import {validateEmail} from "~/composables/validators";
 
 definePageMeta({
   layout: 'noscroll',
 })
-
-import { ref } from 'vue'
 
 const email = ref('')
 const email_small = ref('')
@@ -22,11 +20,14 @@ const onSubmit = () => {
   <main>
     <h1>Sign in to PMCloud</h1>
     <form>
-      <InputInForm name="Email" value="" type="email" aria="Email" v-model:value="email" :small="email_small" small_error/>
+      <InputInForm name="Email" value="" type="email" aria="Email" v-model:value="email" :small="email_small"
+                   small_error/>
       <InputInForm name="Password" reset_password value="" type="password" aria="Password"/>
       <Button label="Sign in" icon="pi pi-sign-in" @click="onSubmit"/>
     </form>
-    <p>Already have an account? <nuxt-link to="/signup">Sign up</nuxt-link></p>
+    <p>Already have an account?
+      <nuxt-link to="/signup">Sign up</nuxt-link>
+    </p>
   </main>
 </template>
 

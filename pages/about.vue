@@ -3,11 +3,23 @@ definePageMeta({
   layout: 'default',
   middleware: ['root-server-only']
 })
+
+const switchUserId = () => {
+  let userId = useCookie('pm_user_id')
+  if(userId.value == '9'){
+    userId.value = '10'
+  }else{
+    userId.value = '9'
+  }
+}
+
+
 </script>
 
 <template>
   <main>
     <h1>about</h1>
+    <Button @click="switchUserId">Switch userId</Button>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
       magna aliqua. Morbi non arcu risus quis. Morbi tristique senectus et netus et. Odio tempor orci dapibus ultrices
       in iaculis nunc sed augue. Diam sollicitudin tempor id eu nisl nunc mi ipsum. Pharetra diam sit amet nisl. Non

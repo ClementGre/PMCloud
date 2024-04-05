@@ -1,5 +1,9 @@
 <script setup lang="ts">
 const rootServer = useRuntimeConfig()?.public?.rootServer
+
+let user = useUserStore()
+let isConnected = user.isConnected(false, true);
+
 </script>
 
 <template>
@@ -25,12 +29,30 @@ const rootServer = useRuntimeConfig()?.public?.rootServer
           <li v-if="rootServer">
             <nuxt-link to="/pricing"><span class="pi pi-dollar"/>Pricing</nuxt-link>
           </li>
-          <li>
-            <nuxt-link to="/signin"><span class="pi pi-sign-in"/>Sign in</nuxt-link>
-          </li>
-          <li>
-            <nuxt-link to="/signup"><span class="pi pi-user-plus"/>Sign up</nuxt-link>
-          </li>
+          <template v-if="!isConnected">
+            <li v-if="user.isUnconfirmed()">
+              <nuxt-link to="/signup/confirm"><span class="pi pi-envelope"/>Confirm account</nuxt-link>
+            </li>
+           <template v-else>
+             <li>
+               <nuxt-link to="/signin"><span class="pi pi-sign-in"/>Sign in</nuxt-link>
+             </li>
+             <li>
+               <nuxt-link to="/signup"><span class="pi pi-user-plus"/>Sign up</nuxt-link>
+             </li>
+           </template>
+          </template>
+          <template v-else>
+            <li>
+              <nuxt-link to="/"><span class="pi pi-user"/>{{user.name}}</nuxt-link>
+            </li>
+          </template>
+          <template v-if="user.isAdmin()">
+            <li>
+              <nuxt-link to="/admin"><span class="pi pi-lock"/>Admin</nuxt-link>
+            </li>
+          </template>
+
         </ul>
       </nav>
     </div>
