@@ -27,3 +27,5 @@ enum-kinds = "0.5.1"
 diesel = { version = "2.1.5", features = ["mysql_backend", "mysql", "r2d2", "chrono"] }
 mail-send = "0.4.7"
 rocket_cors = "0.6.0"
+tera = "1.19.1"
+lazy_static = "1.4.0"

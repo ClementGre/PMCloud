@@ -17,7 +17,7 @@ use crate::database::schema::{auth_tokens::dsl::*, inet6_aton, last_insert_id, U
 use crate::database::user::User;
 use crate::utils::auth::DeviceInfo;
 use crate::utils::errors_catcher::{ErrorResponder, ErrorResponse, ErrorType};
-use crate::utils::mailer::send_email;
+use crate::mailing::mailer::send_email;
 use crate::utils::utils::{random_code, random_token};
 use crate::utils::validation::validate_input;
 

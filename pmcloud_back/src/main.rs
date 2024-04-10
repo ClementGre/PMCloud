@@ -1,12 +1,15 @@
 #[macro_use]
 extern crate rocket;
+extern crate tera;
 
 use std::env;
 use diesel::migration::MigrationSource;
 use diesel::prelude::*;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use rocket::http::Method;
-use rocket_cors::{AllowedHeaders, AllowedOrigins, Cors, CorsOptions, Origins};
+use rocket::response::content;
+use rocket::response::content::RawHtml;
+use rocket_cors::{AllowedHeaders, AllowedOrigins, Cors, CorsOptions};
 use serde::Deserialize;
 use user_agent_parser::UserAgentParser;
 
@@ -14,6 +17,7 @@ use crate::api::auth::signin::auth_signin;
 use crate::api::auth::signup::auth_signup;
 use crate::api::auth::status::auth_status;
 use crate::database::database::{get_connection, get_connection_pool};
+use crate::mailing::mailer::render_email_context;
 use crate::utils::errors_catcher::{bad_request, internal_error, not_found, unauthorized, unprocessable_entity};
 
 mod api {
@@ -55,6 +59,8 @@ mod utils {
     pub mod errors_catcher;
     pub mod validation;
     pub mod auth;
+}
+mod mailing {
     pub mod mailer;
 }
 
@@ -72,8 +78,16 @@ fn rocket() -> _ {
         .attach(cors_options())
         .manage(get_connection_pool())
         .manage(UserAgentParser::from_path("user_agent_regexes.yaml").unwrap())
-        .mount("/", routes![auth_signup, auth_signin, auth_status])
+        .mount("/", routes![auth_signup, auth_signin, auth_status, test_template])
         .register("/", catchers![bad_request, unauthorized, not_found, unprocessable_entity, internal_error])
+}
+
+#[get("/test_template/<template>")]
+fn test_template(template: &str) -> RawHtml<String> {
+    let mut context = tera::Context::new();
+    // context.insert("title", title);
+
+    RawHtml(render_email_context(String::from(template), context))
 }
 
 fn cors_options() -> Cors {

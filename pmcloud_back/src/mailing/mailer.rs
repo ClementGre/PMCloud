@@ -1,8 +1,37 @@
 use std::env;
+use lazy_static::lazy_static;
 
 use mail_send::mail_builder::MessageBuilder;
 use mail_send::SmtpClientBuilder;
+use serde::Serialize;
+use tera::{Context, Tera};
 use tokio::task;
+
+lazy_static! {
+    pub static ref TEMPLATES: Tera = {
+        let mut tera = match Tera::new("src/mailing/templates/**/*") {
+            Ok(t) => t,
+            Err(e) => {
+                println!("Parsing error(s): {}", e);
+                ::std::process::exit(1);
+            }
+        };
+        tera.autoescape_on(vec![".html"]);
+        tera
+    };
+}
+
+pub fn send_rendered_email<T>(to: (String, String), subject: String, body_text: String, template: String, context: T) where T: Serialize + Send + 'static {
+    task::spawn(async move {
+        let context = &Context::from_serialize(context).expect("Unable to serialize email context.");
+        let html = render_email_context(template, context.clone());
+        send_email_async(to, subject, body_text, html)
+    });
+}
+pub fn render_email_context(template: String, context: Context) -> String {
+    TEMPLATES.render(format!("{}.html", template).as_str(), &context)
+            .expect("Unable to render email template.")
+}
 
 pub fn send_email(to: (String, String), subject: String, body_text: String, body_html: String) {
     task::spawn(send_email_async(to, subject, body_text, body_html));
