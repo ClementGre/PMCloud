@@ -8,11 +8,14 @@ use crate::database::user::User;
 
 #[derive(Queryable, Selectable, Identifiable, Associations, Debug, PartialEq)]
 #[diesel(primary_key(id))]
-#[diesel(belongs_to(User))]
+#[diesel(belongs_to(User, foreign_key = owner_id))]
 #[diesel(table_name = pictures)]
 pub struct Picture {
     pub id: u64,
-    pub user_id: u32,
+    pub owner_id: u32,
+    pub author_id: u32,
+    pub deleted_date: Option<NaiveDateTime>,
+    pub copied: bool,
     pub creation_date: NaiveDateTime,
     pub edition_date: NaiveDateTime,
     /// 6 decimals, maximum 100.000000°

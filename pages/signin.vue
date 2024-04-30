@@ -9,9 +9,12 @@ const email = ref('')
 const email_small = ref('')
 
 const onSubmit = () => {
-  let validated = validateEmail(email.value)
-  if (email_small.value === '') {
-    console.log('Email is valid, signing in...')
+  let validated: boolean = validateEmail(email.value)
+  if (!validated) {
+    email_small.value = 'Email is invalid';
+  }else{
+    email_small.value = '';
+
   }
 }
 </script>

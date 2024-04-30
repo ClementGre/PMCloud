@@ -1,7 +1,7 @@
-use diesel::sql_types::{Binary, Nullable, VarChar, SqlType};
-use diesel::query_builder::QueryId;
-use diesel::{table, joinable, allow_tables_to_appear_in_same_query, Queryable};
+use diesel::{allow_tables_to_appear_in_same_query, joinable, Queryable, table};
 use diesel::expression::functions::sql_function;
+use diesel::query_builder::QueryId;
+use diesel::sql_types::{Binary, Nullable, SqlType, VarChar};
 use serde::Serialize;
 
 sql_function! { fn last_insert_id() -> Unsigned<Bigint> }
@@ -15,6 +15,7 @@ pub enum UserConfirmAction {
     Signin,
     DeleteAccount,
 }
+
 #[derive(Debug, PartialEq, Serialize, diesel_derive_enum::DbEnum)]
 pub enum UserStatus {
     Unconfirmed,
@@ -71,8 +72,9 @@ table! {
         id -> Unsigned<Integer>,
         user_id -> Unsigned<Integer>,
         name -> Varchar,
-        is_multiple -> Bool,
+        multiple -> Bool,
         default_tag_id -> Nullable<Unsigned<Integer>>,
+        required -> Bool
     }
 }
 joinable!(tag_groups -> users (user_id));
@@ -84,6 +86,7 @@ table! {
         tag_group_id -> Unsigned<Integer>,
         name -> Varchar,
         color -> Binary,
+        is_default -> Bool,
     }
 }
 joinable!(tags -> tag_groups (tag_group_id));
@@ -107,7 +110,10 @@ table! {
     use super::PictureOrientationMapping;
     pictures (id) {
         id -> Unsigned<BigInt>,
-        user_id -> Unsigned<Integer>,
+        owner_id -> Unsigned<Integer>,
+        author_id -> Unsigned<Integer>,
+        deleted_date -> Nullable<Datetime>,
+        copied -> Bool,
         creation_date -> Datetime,
         edition_date -> Datetime,
         latitude -> Nullable<Decimal>,
@@ -125,7 +131,8 @@ table! {
         f_number -> Nullable<Decimal>,
     }
 }
-joinable!(pictures -> users (user_id));
+joinable!(pictures -> users (owner_id));
+//joinable!(pictures -> users (author_id));
 allow_tables_to_appear_in_same_query!(pictures, users);
 
 table! {
@@ -140,78 +147,87 @@ allow_tables_to_appear_in_same_query!(pictures_tags, pictures);
 allow_tables_to_appear_in_same_query!(pictures_tags, tags);
 
 table! {
-    groups (id) {
+    arrangements (id) {
         id -> Unsigned<Integer>,
         user_id -> Unsigned<Integer>,
         name -> Varchar,
+        match_conversion -> Bool,
         strategy -> Blob,
     }
 }
-joinable!(groups -> users (user_id));
-allow_tables_to_appear_in_same_query!(groups, users);
+joinable!(arrangements -> users (user_id));
+allow_tables_to_appear_in_same_query!(arrangements, users);
 
 table! {
-    subgroups (id) {
+    groups (id) {
         id -> Unsigned<Integer>,
-        group_id -> Unsigned<Integer>,
+        arrangement_id -> Unsigned<Integer>,
         name -> Varchar,
+        share_link -> Nullable<Unsigned<BigInt>>,
     }
 }
-joinable!(subgroups -> groups (group_id));
-allow_tables_to_appear_in_same_query!(subgroups, groups);
+joinable!(groups -> arrangements (arrangement_id));
+allow_tables_to_appear_in_same_query!(groups, arrangements);
 
 table! {
-    subgroups_pictures (subgroup_id, picture_id) {
-        subgroup_id -> Unsigned<Integer>,
+    groups_pictures (group_id, picture_id) {
+        group_id -> Unsigned<Integer>,
         picture_id -> Unsigned<BigInt>,
     }
 }
-joinable!(subgroups_pictures -> subgroups (subgroup_id));
-joinable!(subgroups_pictures -> pictures (picture_id));
-allow_tables_to_appear_in_same_query!(subgroups_pictures, subgroups);
-allow_tables_to_appear_in_same_query!(subgroups_pictures, pictures);
+joinable!(groups_pictures -> groups (group_id));
+joinable!(groups_pictures -> pictures (picture_id));
+allow_tables_to_appear_in_same_query!(groups_pictures, groups);
+allow_tables_to_appear_in_same_query!(groups_pictures, pictures);
 
-#[derive(Debug, PartialEq, diesel_derive_enum::DbEnum)]
-pub enum SharedSubgroupType {
-    Unconfirmed,
-    Sync,
-    Preserve,
-}
 table! {
-    use diesel::sql_types::*;
-    use super::SharedSubgroupTypeMapping;
-    shared_subgroups (user_id, subgroup_id) {
-        user_id -> Unsigned<Integer>,
-        subgroup_id -> Unsigned<Integer>,
-        #[sql_name="type"]
-        pic_type -> SharedSubgroupTypeMapping,
+    link_share_groups (token) {
+        token -> Binary,
+        group_id -> Unsigned<Integer>,
+        permissions -> Unsigned<TinyInt>,
     }
 }
-joinable!(shared_subgroups -> subgroups (subgroup_id));
-joinable!(shared_subgroups -> users (user_id));
-allow_tables_to_appear_in_same_query!(shared_subgroups, subgroups);
-allow_tables_to_appear_in_same_query!(shared_subgroups, users);
+joinable!(link_share_groups -> groups (group_id));
+allow_tables_to_appear_in_same_query!(link_share_groups, groups);
+
+table! {
+    use diesel::sql_types::*;
+    shared_groups (user_id, group_id) {
+        user_id -> Unsigned<Integer>,
+        group_id -> Unsigned<Integer>,
+        permissions -> Unsigned<TinyInt>,
+        match_conversion_group_id -> Nullable<Unsigned<Integer>>,
+        copied -> Bool,
+        confirmed -> Bool,
+    }
+}
+joinable!(shared_groups -> groups (group_id));
+joinable!(shared_groups -> users (user_id));
+//joinable!(shared_groups -> groups (match_conversion_group_id));
+allow_tables_to_appear_in_same_query!(shared_groups, groups);
+allow_tables_to_appear_in_same_query!(shared_groups, users);
 
 table! {
     hierarchies (id) {
         id -> Unsigned<Integer>,
         user_id -> Unsigned<Integer>,
         name -> Varchar,
+        match_conversion -> Bool,
     }
 }
 joinable!(hierarchies -> users (user_id));
 allow_tables_to_appear_in_same_query!(hierarchies, users);
 
 table! {
-    hierarchies_groups (hierarchy_id, group_id) {
+    hierarchies_arrangements(hierarchy_id, arrangement_id) {
         hierarchy_id -> Unsigned<Integer>,
-        group_id -> Unsigned<Integer>,
-        parent_subgroup_id -> Unsigned<Integer>,
+        arrangement_id -> Unsigned<Integer>,
+        parent_group_id -> Unsigned<Integer>,
     }
 }
-joinable!(hierarchies_groups -> hierarchies (hierarchy_id));
-joinable!(hierarchies_groups -> groups (group_id));
-joinable!(hierarchies_groups -> subgroups (parent_subgroup_id));
-allow_tables_to_appear_in_same_query!(hierarchies_groups, hierarchies);
-allow_tables_to_appear_in_same_query!(hierarchies_groups, groups);
-allow_tables_to_appear_in_same_query!(hierarchies_groups, subgroups);
+joinable!(hierarchies_arrangements -> hierarchies (hierarchy_id));
+joinable!(hierarchies_arrangements -> arrangements (arrangement_id));
+joinable!(hierarchies_arrangements -> groups (parent_group_id));
+allow_tables_to_appear_in_same_query!(hierarchies_arrangements, hierarchies);
+allow_tables_to_appear_in_same_query!(hierarchies_arrangements, arrangements);
+allow_tables_to_appear_in_same_query!(hierarchies_arrangements, groups);

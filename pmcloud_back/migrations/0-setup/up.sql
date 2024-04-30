@@ -1,5 +1,6 @@
 CREATE TABLE users
 (
+    CONSTRAINT PK_users PRIMARY KEY (id),
     id                  INT UNSIGNED AUTO_INCREMENT,
     name                VARCHAR(32)                                       NOT NULL,
     email               VARCHAR(256)                                      NOT NULL UNIQUE,
@@ -11,8 +12,7 @@ CREATE TABLE users
     confirm_code        SMALLINT UNSIGNED                                          DEFAULT NULL,
     confirm_code_trials TINYINT UNSIGNED                                  NOT NULL DEFAULT 0,
     status              ENUM ('unconfirmed', 'normal', 'banned', 'admin') NOT NULL DEFAULT 'unconfirmed',
-    storage_count_mo    INT UNSIGNED                                      NOT NULL DEFAULT 0,
-    CONSTRAINT PK_users PRIMARY KEY (id)
+    storage_count_mo    INT UNSIGNED                                      NOT NULL DEFAULT 0
 );
 
 CREATE TABLE auth_tokens
@@ -39,11 +39,11 @@ CREATE TABLE shares_auto_accept
 CREATE TABLE tag_groups
 (
     CONSTRAINT PK_tag_groups PRIMARY KEY (id),
-    id             INT UNSIGNED AUTO_INCREMENT,
-    user_id        INT UNSIGNED NOT NULL,
-    name           VARCHAR(32)  NOT NULL,
-    is_multiple    BOOLEAN      NOT NULL DEFAULT FALSE,
-    default_tag_id INT UNSIGNED,
+    id       INT UNSIGNED AUTO_INCREMENT,
+    user_id  INT UNSIGNED NOT NULL,
+    name     VARCHAR(32)  NOT NULL,
+    multiple BOOLEAN      NOT NULL DEFAULT FALSE,
+    required BOOLEAN      NOT NULL DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
@@ -54,6 +54,7 @@ CREATE TABLE tags
     tag_group_id INT UNSIGNED NOT NULL,
     name         VARCHAR(32)  NOT NULL,
     color        BINARY(3)    NOT NULL DEFAULT 0x000000,
+    is_default   BOOLEAN      NOT NULL DEFAULT FALSE,
     FOREIGN KEY (tag_group_id) REFERENCES tag_groups (id)
 );
 
@@ -61,7 +62,10 @@ CREATE TABLE pictures
 (
     CONSTRAINT PK_photos PRIMARY KEY (id),
     id                BIGINT UNSIGNED AUTO_INCREMENT,
-    user_id           INT UNSIGNED                                                                                                                                             NOT NULL,
+    owner_id          INT UNSIGNED                                                                                                                                             NOT NULL,
+    author_id         INT UNSIGNED                                                                                                                                             NOT NULL,
+    deleted_date      DATETIME                                                                                                                                                          DEFAULT NULL,
+    copied            BOOLEAN                                                                                                                                                  NOT NULL,
     creation_date     DATETIME                                                                                                                                                 NOT NULL,
     edition_date      DATETIME                                                                                                                                                 NOT NULL,
     latitude          DECIMAL(8, 6),
@@ -77,7 +81,8 @@ CREATE TABLE pictures
     exposure_time_den INT UNSIGNED,
     iso_speed         INT UNSIGNED,
     f_number          DECIMAL(4, 1),
-    FOREIGN KEY (user_id) REFERENCES users (id)
+    FOREIGN KEY (owner_id) REFERENCES users (id),
+    FOREIGN KEY (author_id) REFERENCES users (id)
 );
 
 CREATE TABLE pictures_tags
@@ -89,58 +94,75 @@ CREATE TABLE pictures_tags
     FOREIGN KEY (tag_id) REFERENCES tags (id)
 );
 
-CREATE TABLE `groups`
+CREATE TABLE arrangements
 (
-    CONSTRAINT PK_groups PRIMARY KEY (id),
-    id       INT UNSIGNED AUTO_INCREMENT,
-    user_id  INT UNSIGNED NOT NULL,
-    name     VARCHAR(32)  NOT NULL,
-    strategy BLOB         NOT NULL,
+    CONSTRAINT PK_arrangements PRIMARY KEY (id),
+    id               INT UNSIGNED AUTO_INCREMENT,
+    user_id          INT UNSIGNED NOT NULL,
+    name             VARCHAR(32)  NOT NULL,
+    match_conversion BOOLEAN      NOT NULL DEFAULT FALSE,
+    strategy         BLOB         NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE subgroups
+CREATE TABLE `groups`
 (
-    CONSTRAINT PK_subgroups PRIMARY KEY (id),
-    id       INT UNSIGNED AUTO_INCREMENT,
-    group_id INT UNSIGNED NOT NULL,
-    name     VARCHAR(32)  NOT NULL,
-    FOREIGN KEY (group_id) REFERENCES `groups` (id)
+    CONSTRAINT PK_groups PRIMARY KEY (id),
+    id             INT UNSIGNED AUTO_INCREMENT,
+    arrangement_id INT UNSIGNED NOT NULL,
+    name           VARCHAR(32)  NOT NULL,
+    FOREIGN KEY (arrangement_id) REFERENCES arrangements (id)
 );
 
-CREATE TABLE subgroups_pictures
+CREATE TABLE groups_pictures
 (
-    CONSTRAINT PK_subgroups_pictures PRIMARY KEY (subgroup_id, picture_id),
-    subgroup_id INT UNSIGNED,
-    picture_id  BIGINT UNSIGNED,
-    FOREIGN KEY (subgroup_id) REFERENCES subgroups (id),
+    CONSTRAINT PK_groups_pictures PRIMARY KEY (group_id, picture_id),
+    group_id   INT UNSIGNED,
+    picture_id BIGINT UNSIGNED,
+    FOREIGN KEY (group_id) REFERENCES `groups` (id),
     FOREIGN KEY (picture_id) REFERENCES pictures (id)
 );
 
-CREATE TABLE shared_subgroups
+CREATE TABLE link_share_groups
 (
-    CONSTRAINT PK_shared_subgroups PRIMARY KEY (user_id, subgroup_id),
-    user_id     INT UNSIGNED,
-    subgroup_id INT UNSIGNED,
-    type        ENUM ('unconfirmed', 'sync', 'preserve') DEFAULT 'unconfirmed' NOT NULL,
+    CONSTRAINT PK_link_share_groups PRIMARY KEY (token),
+    token       BINARY(16)   NOT NULL,
+    group_id    INT UNSIGNED NOT NULL,
+    permissions TINYINT      NOT NULL DEFAULT 0, -- Bits : Add pictures / Share back / Edit exif / Edit picture / Delete
+    FOREIGN KEY (group_id) REFERENCES `groups` (id)
+);
+
+CREATE TABLE shared_groups
+(
+    CONSTRAINT PK_shared_groups PRIMARY KEY (user_id, group_id),
+    user_id                   INT UNSIGNED NOT NULL,
+    group_id                  INT UNSIGNED NOT NULL,
+    permissions               TINYINT      NOT NULL DEFAULT 0, -- Bits : Add pictures / Share back / Edit exif / Edit picture / Delete
+    match_conversion_group_id INT UNSIGNED          DEFAULT NULL,
+    copied                    BOOLEAN      NOT NULL DEFAULT FALSE,
+    confirmed                 BOOLEAN      NOT NULL DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (subgroup_id) REFERENCES subgroups (id)
+    FOREIGN KEY (group_id) REFERENCES `groups` (id),
+    FOREIGN KEY (match_conversion_group_id) REFERENCES `groups` (id)
 );
 
 CREATE TABLE hierarchies
 (
     CONSTRAINT PK_hierarchy PRIMARY KEY (id),
-    id      INT UNSIGNED AUTO_INCREMENT,
-    user_id INT UNSIGNED NOT NULL,
-    name    VARCHAR(32)  NOT NULL
+    id               INT UNSIGNED AUTO_INCREMENT,
+    user_id          INT UNSIGNED NOT NULL,
+    name             VARCHAR(32)  NOT NULL,
+    match_conversion BOOLEAN      NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE hierarchies_groups
+CREATE TABLE hierarchies_arrangements
 (
-    CONSTRAINT PK_hierarchy_groups PRIMARY KEY (hierarchy_id, group_id),
-    hierarchy_id       INT UNSIGNED,
-    group_id           INT UNSIGNED,
-    parent_subgroup_id INT UNSIGNED NOT NULL,
+    CONSTRAINT PK_hierarchy_groups PRIMARY KEY (hierarchy_id, arrangements_id),
+    hierarchy_id    INT UNSIGNED,
+    arrangements_id INT UNSIGNED,
+    parent_group_id INT UNSIGNED NOT NULL,
     FOREIGN KEY (hierarchy_id) REFERENCES hierarchies (id),
-    FOREIGN KEY (group_id) REFERENCES `groups` (id)
+    FOREIGN KEY (arrangements_id) REFERENCES arrangements (id),
+    FOREIGN KEY (parent_group_id) REFERENCES `groups` (id)
 );

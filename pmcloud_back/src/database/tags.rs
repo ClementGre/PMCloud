@@ -1,6 +1,7 @@
 use diesel::{Associations, Identifiable, Queryable, Selectable};
+
+use crate::database::{picture::Picture, user::User};
 use crate::database::schema::*;
-use crate::database::{user::User, picture::Picture};
 
 #[derive(Queryable, Selectable, Identifiable, Associations, Debug, PartialEq)]
 #[diesel(primary_key(id))]
@@ -10,8 +11,8 @@ pub struct TagGroup {
     pub id: u32,
     pub user_id: u32,
     pub name: String,
-    pub is_multiple: bool,
-    pub default_tag_id: Option<u32>,
+    pub multiple: bool,
+    pub required: bool,
 }
 
 #[derive(Queryable, Selectable, Identifiable, Associations, Debug, PartialEq)]
@@ -23,6 +24,7 @@ pub struct Tag {
     pub tag_group_id: u32,
     pub name: String,
     pub color: Vec<u8>,
+    pub is_default: bool,
 }
 
 #[derive(Queryable, Selectable, Identifiable, Associations, Debug, PartialEq)]
