@@ -7,6 +7,7 @@ definePageMeta({
 
 const email = ref('')
 const email_small = ref('')
+const password = ref('')
 
 const onSubmit = () => {
   let validated: boolean = validateEmail(email.value)
@@ -14,7 +15,7 @@ const onSubmit = () => {
     email_small.value = 'Email is invalid';
   }else{
     email_small.value = '';
-
+    useUserStore().signIn(email.value, password.value)
   }
 }
 </script>
@@ -23,9 +24,9 @@ const onSubmit = () => {
   <main>
     <h1>Sign in to PMCloud</h1>
     <form>
-      <InputInForm name="Email" value="" type="email" aria="Email" v-model:value="email" :small="email_small"
+      <InputInForm name="Email" type="email" aria="Email" v-model:value="email" :small="email_small"
                    small_error/>
-      <InputInForm name="Password" reset_password value="" type="password" aria="Password"/>
+      <InputInForm name="Password" reset_password value="" type="password" aria="Password" v-model:value="password"/>
       <Button label="Sign in" icon="pi pi-sign-in" @click="onSubmit"/>
     </form>
     <p>Already have an account?

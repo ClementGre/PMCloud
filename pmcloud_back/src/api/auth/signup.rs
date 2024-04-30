@@ -42,13 +42,6 @@ pub fn auth_signup(data: Json<SignupData>, db: &rocket::State<DBPool>, device_in
     validate_input(&data)?;
     let conn = &mut db.get().unwrap();
 
-    // if user.is_some() {
-    //     println!("User: {:?}", user);
-    //     return Err(ErrorResponder::Unauthorized(Json(ErrorResponse {
-    //         message: "User already signed in".to_string()
-    //     })));
-    // }
-
     let conf_code = random_code(4) as u16;
     let conf_token = random_token(16);
     let result = insert_into(users)
@@ -58,6 +51,7 @@ pub fn auth_signup(data: Json<SignupData>, db: &rocket::State<DBPool>, device_in
             password_hash.eq(bcrypt::hash(data.password.clone()).unwrap()),
             confirm_code.eq(conf_code),
             confirm_token.eq(conf_token.clone()),
+            // confirm_action = 'signup', status = 'unconfirmed'
         ))
         .execute(conn).map_err(|e| {
         if let diesel::result::Error::DatabaseError(kind, _) = e {

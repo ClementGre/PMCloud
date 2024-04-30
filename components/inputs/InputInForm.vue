@@ -11,10 +11,10 @@ const props = defineProps({
   reset_password: Boolean
 })
 
-const target = ref(null)
+const target = ref()
 const emit = defineEmits(['update:value'])
 
-let id;
+let id: string = '';
 if(props.name){
   id = props.name.toLowerCase() + '-input';
 }
@@ -33,7 +33,7 @@ if(props.name){
         :ref="target"
         :type="type"
         :value="props.value"
-        @input="emit('update:value', $event.target.value)"
+        @input="emit('update:value', $event?.target?.value)"
         :aria-describedby="props.aria"
         :invalid="small_error && small?.length != 0"
         autocomplete="on"/>

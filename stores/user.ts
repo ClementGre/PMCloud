@@ -9,10 +9,18 @@ export enum UserStatus {
     NotConnected = 'NotConnected',
     Unknown = 'Unknown'
 }
+
 export type AuthStatus = {
     status: UserStatus
     name: string
     email: string
+}
+
+export type SignInResponse = {
+    status: UserStatus
+    name: string
+    id: string
+    auth_token: string
 }
 
 
@@ -37,6 +45,21 @@ export const useUserStore = defineStore('user', () => {
     const isAdmin = () => {
         return status.value == UserStatus.Admin
     }
+    const signIn = (email: string, password: string) => {
+        return useFetchApi(false, 'POST', null, null, '/auth/signin', {email, password},
+            (data: SignInResponse) => {
+                status.value = data.status
+                name.value = data.name
+                id.value = data.id
+                auth_token.value = data.auth_token
+            }, (error: ApiError | null) => {
+                if (error && error.error_type === ErrorType.Unauthorized) {
+                    status.value = UserStatus.NotConnected
+                } else {
+                    status.value = UserStatus.Unknown
+                }
+            });
+    }
 
     const fetchStatus = async () => {
         // id = useCookie('pm_user_id')
@@ -57,13 +80,15 @@ export const useUserStore = defineStore('user', () => {
                     // id.value = null
                     // auth_token.value = null
                 });
-        }else{
+        } else {
             status.value = UserStatus.NotConnected
         }
     }
 
 
-    return {status, name, email, id, auth_token,
-        isConnected, isUnconfirmed, isAdmin,
-        fetchStatus}
+    return {
+        status, name, email, id, auth_token,
+        isConnected, isUnconfirmed, isAdmin, signIn,
+        fetchStatus
+    }
 })
