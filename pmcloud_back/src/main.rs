@@ -71,13 +71,13 @@ fn rocket() -> _ {
 
     // migrate database
     let mut conn = get_connection();
-    // let res = conn.run_pending_migrations(MIGRATIONS).unwrap();
-    // println!("Migrations result: {:?}", res);
+    let res = conn.run_pending_migrations(MIGRATIONS).unwrap();
+    println!("Migrations result: {:?}", res);
 
     rocket::build()
         .attach(cors_options())
         .manage(get_connection_pool())
-        .manage(UserAgentParser::from_path("user_agent_regexes.yaml").unwrap())
+        .manage(UserAgentParser::from_path("./static/user_agent_regexes.yaml").unwrap())
         .mount("/", routes![auth_signup, auth_signin, auth_status, test_template])
         .register("/", catchers![bad_request, unauthorized, not_found, unprocessable_entity, internal_error])
 }

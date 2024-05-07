@@ -4,10 +4,11 @@ use pwhash::bcrypt;
 use rocket::serde::{Deserialize, Serialize};
 use rocket::serde::json::Json;
 use validator::Validate;
+
 use crate::database::auth_token::AuthToken;
 use crate::database::database::{DBConn, DBPool};
-use crate::database::schema::auth_tokens;
 use crate::database::schema::{inet6_aton, last_insert_id, UserStatus};
+use crate::database::schema::auth_tokens;
 use crate::database::schema::users;
 use crate::database::user::User;
 use crate::utils::auth::DeviceInfo;

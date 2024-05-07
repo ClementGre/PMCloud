@@ -1,0 +1,42 @@
+version: '3.3'
+services:
+  pmcloud-db:
+    image: mysql:8.4
+    container_name: pmcloud-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: xxx
+      MYSQL_DATABASE: pmcloud
+      MYSQL_USER: pmcloud
+      MYSQL_PASSWORD: xxx
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db:/var/lib/mysql
+
+  pmcloud-back:
+    build: pmcloud_back
+    image: pmcloud-back
+    container_name: pmcloud-back
+    restart: unless-stopped
+    depends_on:
+      - pmcloud-db
+    ports:
+      - "8000:80"
+    environment:
+      - DATABASE_URL=mysql://pmcloud:xxx@pmcloud-db:3306/pmcloud
+      - SMTP_SERVER=email-smtp.eu-north-1.amazonaws.com
+      - SMTP_USERNAME=
+      - SMTP_PASSWORD=
+      - FRONTEND_HOST=http://localhost:3000 # for CORS policy
+
+  pmcloud-front:
+    build: .
+    image: pmcloud-front
+    container_name: pmcloud-front
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      - ROOT_SERVER=true
+      - BACKEND_HOST=http://127.0.0.1:8000

@@ -33,7 +33,7 @@ if(props.name){
         :ref="target"
         :type="type"
         :value="props.value"
-        @input="emit('update:value', $event?.target?.value)"
+        @input="emit('update:value', ($event.target as HTMLInputElement).value)"
         :aria-describedby="props.aria"
         :invalid="small_error && small?.length != 0"
         autocomplete="on"/>

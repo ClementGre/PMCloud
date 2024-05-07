@@ -4,7 +4,7 @@ export default defineNuxtConfig({
         apiSecret: '123',
         public: {
             rootServer: (/true/i).test(process.env.ROOT_SERVER || ""),
-            apiUrl: process.env.API_URL || 'http://localhost:8000',
+            apiUrl: process.env.BACKEND_HOST || 'http://localhost:8000',
         }
     },
     app: {
