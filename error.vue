@@ -16,15 +16,15 @@ const handleError = () => clearError({redirect: '/'})
   <NuxtLayout name="noscroll">
     <main>
 
-      <template v-if="props.error?.statusCode === 404">
+      <template v-if="props?.error?.statusCode === 404">
         <h1>404 - Page Not Found</h1>
-        <template v-if="props.error?.data.rootServerError">
+        <template v-if="props?.error?.data.rootServerError">
           <p>This page does not exist on this standalone version of PMCloud, but exists on the PMCloud root server:<br/><a :href="'https://pmcloud.com' + props.error.data.path">{{ 'https://pmcloud.com' + props.error.data.path }}</a></p>
         </template>
         <p v-else>The page you are looking for does not exist.</p>
       </template>
       <template v-else>
-        <h1>Error {{props.error?.statusCode}}</h1>
+        <h1>Error {{props?.error?.statusCode}}</h1>
         <p>Please contact administrators</p>
       </template>
 

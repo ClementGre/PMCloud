@@ -1,4 +1,5 @@
 import {useUserStore} from "~/stores/user";
+import {hash} from "ohash";
 
 
 export enum ErrorType {
@@ -47,21 +48,29 @@ export const useFetchApi = async function <B, R>(ssr: boolean = false, method: s
                                         id: string | null | undefined, path: string, body: B,
                                         onSuccess: (data: R) => void, onError: (error: ApiError | null) => void) {
 
-    const API_URL = useRuntimeConfig()?.public?.apiUrl;
 
-    let server = process.server ? '[server] ' : '';
-    console.log(server + 'useFetchApi', 'ssr:', ssr, 'method:', method, 'id:', id, 'path:', path, 'body:', body)
+    const backend_host = process.server ? useRuntimeConfig()?.public?.backendHostSSR : useRuntimeConfig()?.public?.backendHost;
+    console.log('useFetchApi', 'ssr:', ssr, 'method:', method, 'id:', id, 'path:', path, 'body:', body)
+
 
     // @ts-ignore
-    let {data, error} = await useFetch<R, HttpError>(API_URL + path, {
+    let {data, error} = await useFetch<R, HttpError>(backend_host + path, {
+        key: hash([ssr, method, auth_token, id, path, body]),
         method: method,
         headers: {
-            'User-Agent': 'vueuse',
+            'User-Agent': process.server ? '' : window.navigator.userAgent, // User needed only for login & signup queries.
             'X-Auth-Token': auth_token,
             'X-User-Id': id
         },
         server: ssr,
-        body: body
+        body: body,
+        onRequest: (config) => {
+            if(process.server){
+                console.info('useFetchApi on SERVER');
+            }else{
+                console.info('useFetchApi on CLIENT');
+            }
+        }
     })
     if (data.value) {
         console.log('useFetchApi', 'Success:', data.value)

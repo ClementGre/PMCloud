@@ -39,4 +39,5 @@ services:
       - "3000:80"
     environment:
       - ROOT_SERVER=true
-      - BACKEND_HOST=http://127.0.0.1:8000
+      - NUXT_PUBLIC_BACKEND_HOST=http://127.0.0.1:8000
+      - NUXT_PUBLIC_BACKEND_HOST_SSR=http://pmcloud-back:80

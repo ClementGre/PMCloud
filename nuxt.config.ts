@@ -1,10 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     runtimeConfig: {
-        apiSecret: '123',
         public: {
-            rootServer: (/true/i).test(process.env.ROOT_SERVER || ""),
-            apiUrl: process.env.BACKEND_HOST || 'http://localhost:8000',
+            rootServer: (/true/i).test(process.env.ROOT_SERVER || ""), // Overrideable at build time only by env ROOT_SERVER
+            backendHost: 'http://127.0.0.1:8000', // Overrideable by env NUXT_PUBLIC_BACKEND_HOST
+            backendHostSSR: 'http://127.0.0.1:8000', // Overrideable by env NUXT_PUBLIC_BACKEND_HOST_SSR
         }
     },
     app: {
